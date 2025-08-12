@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Update Logs Tracker",
+  "description": "Automatically adds a brief entry to the Update Logs page whenever files are modified, updated, or new functions are added",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/**/*.tsx",
+      "src/**/*.ts",
+      "src/**/*.js",
+      "src/**/*.jsx",
+      "package.json",
+      "README.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A file has been modified in the project. Please analyze the changes and add a brief entry to the \"Update Logs\" page describing what was modified, updated, or added. Keep the entry concise and focus on user-facing changes or new functionality."
+  }
+}

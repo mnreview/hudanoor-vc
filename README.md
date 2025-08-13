@@ -19,7 +19,8 @@
 - **UI Framework**: Tailwind CSS + shadcn/ui
 - **State Management**: TanStack Query (React Query)
 - **Charts**: Recharts
-- **Database**: Google Sheets (via Google Apps Script)
+- **Backend**: Vercel Serverless Functions
+- **Database**: Google Sheets (via Google Sheets API)
 - **Icons**: Lucide React
 
 ## 🚀 Quick Start
@@ -32,21 +33,59 @@ cd hudanoor-system
 npm install
 ```
 
-### 2. ตั้งค่า Google Sheets
+### 2. ตั้งค่า Google Sheets และ Vercel
 
-1. ทำตามคำแนะนำใน [GOOGLE_SHEETS_SETUP.md](./GOOGLE_SHEETS_SETUP.md)
-2. คัดลอก `.env.example` เป็น `.env`
-3. ใส่ Google Apps Script URL ในไฟล์ `.env`
+#### สำหรับ Development (Local):
+1. คัดลอก `.env.example` เป็น `.env.local`
+2. ตั้งค่า Google Sheets API (ดูใน [GOOGLE_SHEETS_SETUP.md](./GOOGLE_SHEETS_SETUP.md))
 
 ```env
-VITE_GOOGLE_APPS_SCRIPT_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
+VITE_GOOGLE_SHEETS_ID=your_spreadsheet_id
+VITE_GOOGLE_API_KEY=your_api_key
 ```
+
+#### สำหรับ Production (Vercel):
+1. ทำตามคำแนะนำใน [VERCEL_DEPLOYMENT_GUIDE.md](./VERCEL_DEPLOYMENT_GUIDE.md)
+2. ตั้งค่า Environment Variables ใน Vercel Dashboard:
+   - `GOOGLE_CLIENT_EMAIL`
+   - `GOOGLE_PRIVATE_KEY`
+   - `GOOGLE_SHEETS_SPREADSHEET_ID`
 
 ### 3. รันโปรเจค
 
 ```bash
 npm run dev
 ```
+
+### 4. Deploy ไป Vercel
+
+```bash
+# ติดตั้ง Vercel CLI
+npm install -g vercel
+
+# Deploy
+vercel
+
+# หรือ Deploy to production
+vercel --prod
+```
+
+## 🔄 Migration จาก Google Apps Script ไป Vercel
+
+โปรเจคนี้ได้ย้ายจาก Google Apps Script มาใช้ Vercel Serverless Functions แล้ว:
+
+### ข้อดีของ Vercel:
+- ✅ **Performance ดีกว่า** - Global CDN และ Edge Functions
+- ✅ **Scalability** - Auto-scaling ตามการใช้งาน
+- ✅ **Developer Experience** - Git integration, Preview deployments
+- ✅ **Reliability** - Uptime ดีกว่า Google Apps Script
+- ✅ **Modern Stack** - ใช้ Node.js และ modern APIs
+
+### การทำงาน:
+- **Development**: ใช้ Google Sheets API โดยตรง (ถ้าตั้งค่าไว้)
+- **Production**: ใช้ Vercel API Routes ที่เชื่อมต่อกับ Google Sheets
+
+ดูรายละเอียดการ migrate ใน [MIGRATION_TO_VERCEL.md](./MIGRATION_TO_VERCEL.md)
 
 เปิด [http://localhost:5173](http://localhost:5173) ในเบราว์เซอร์
 

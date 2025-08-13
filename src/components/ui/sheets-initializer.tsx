@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { initializeSheets } from '@/lib/google-apps-script';
+import { initializeSheets } from '@/lib/sheets-adapter';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 export function SheetsInitializer() {

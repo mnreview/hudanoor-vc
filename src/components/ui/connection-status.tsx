@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { getConfigurationStatus } from '@/lib/google-apps-script';
+import { getConfigurationStatus } from '@/lib/sheets-adapter';
 import { CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
 
 export function ConnectionStatus() {

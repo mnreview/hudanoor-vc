@@ -26,6 +26,76 @@ import {
 
 const mockUpdateLogs: UpdateLog[] = [
   {
+    id: "10",
+    version: "1.3.6",
+    date: "2024-12-08",
+    title: "อัปเดตเอกสาร README สำหรับสถาปัตยกรรมใหม่",
+    description: "อัปเดต README.md ให้สะท้อนการเปลี่ยนแปลงสถาปัตยกรรมจาก Google Apps Script เป็น Vercel Serverless Functions พร้อมระบุการใช้ Google Sheets API โดยตรงแทนการผ่าน Google Apps Script",
+    type: "improvement",
+    isImportant: false,
+    createdAt: "2024-12-08T23:59:30Z"
+  },
+  {
+    id: "09",
+    version: "1.3.5",
+    date: "2024-12-08",
+    title: "เสร็จสิ้นการย้ายไป Vercel API อย่างสมบูรณ์",
+    description: "อัปเดต sheets-adapter.ts ให้ใช้ Vercel API เป็นหลักในทุกสถานการณ์ โดยลบ conditional logic ที่เลือกระหว่าง Google Sheets API และ Vercel API ออก ทำให้ระบบใช้ Vercel Serverless Functions อย่างเต็มรูปแบบและเสถียรมากขึ้น",
+    type: "improvement",
+    isImportant: true,
+    createdAt: "2024-12-08T23:59:00Z"
+  },
+  {
+    id: "08",
+    version: "1.3.4",
+    date: "2024-12-08",
+    title: "อัปเดต Connection Status Component ให้ใช้ Vercel API",
+    description: "เปลี่ยน Connection Status component ให้ใช้ getConfigurationStatus จาก vercel-sheets แทน google-apps-script เพื่อให้แสดงสถานะการเชื่อมต่อที่ถูกต้องสำหรับระบบ Vercel",
+    type: "improvement",
+    isImportant: false,
+    createdAt: "2024-12-08T23:58:00Z"
+  },
+  {
+    id: "07",
+    version: "1.3.3",
+    date: "2024-12-08",
+    title: "เปลี่ยนไปใช้ Vercel API โดยตรง",
+    description: "อัปเดต use-sheets-data hook ให้ใช้ Vercel API โดยตรงแทนการใช้ sheets-adapter เพื่อให้ระบบทำงานกับ Vercel Serverless Functions อย่างเต็มประสิทธิภาพ ช่วยลดความซับซ้อนและเพิ่มความเสถียรของระบบ",
+    type: "improvement",
+    isImportant: true,
+    createdAt: "2024-12-08T23:55:00Z"
+  },
+  {
+    id: "06",
+    version: "1.3.2",
+    date: "2024-12-08",
+    title: "เพิ่มระบบ Adaptive Sheets API",
+    description: "สร้างไฟล์ sheets-adapter.ts ใหม่ที่ทำหน้าที่เป็น adapter layer ระหว่าง Google Sheets API และ Vercel API โดยจะเลือกใช้ API ที่เหมาะสมตามสภาพแวดล้อม (development/production) และการตั้งค่าที่มีอยู่ ช่วยให้ระบบทำงานได้อย่างราบรื่นในทุกสถานการณ์",
+    type: "improvement",
+    isImportant: true,
+    createdAt: "2024-12-08T23:50:00Z"
+  },
+  {
+    id: "05",
+    version: "1.3.1",
+    date: "2024-12-08",
+    title: "เพิ่มระบบ Vercel Sheets Integration",
+    description: "สร้างไฟล์ vercel-sheets.ts ใหม่สำหรับการเชื่อมต่อกับ Google Sheets ผ่าน Vercel API endpoints พร้อมฟังก์ชันการอ่าน เขียน และอัปเดตข้อมูลรายรับ-รายจ่าย รองรับการทำงานทั้งใน development และ production environment",
+    type: "feature",
+    isImportant: true,
+    createdAt: "2024-12-08T23:45:00Z"
+  },
+  {
+    id: "04",
+    version: "1.3.0",
+    date: "2024-12-08",
+    title: "เพิ่ม googleapis package สำหรับการย้ายไป Vercel",
+    description: "เพิ่ม googleapis package เวอร์ชั่น 144.0.0 เพื่อรองรับการใช้งาน Google Sheets API ในระบบ Vercel Serverless Functions ตามแผนการย้ายจาก Google Apps Script",
+    type: "improvement",
+    isImportant: true,
+    createdAt: "2024-12-08T23:30:00Z"
+  },
+  {
     id: "03",
     version: "1.2.9",
     date: "2024-12-08",

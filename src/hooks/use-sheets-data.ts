@@ -5,7 +5,7 @@ import {
   getExpenseData, 
   addIncomeRecord, 
   addExpenseRecord 
-} from '@/lib/google-apps-script';
+} from '@/lib/sheets-adapter';
 import { Income, Expense } from '@/types';
 import { toast } from '@/hooks/use-toast';
 

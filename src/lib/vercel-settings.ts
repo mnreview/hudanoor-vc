@@ -1,0 +1,83 @@
+// API base URL - automatically detects environment
+const API_BASE = typeof window !== 'undefined' 
+  ? (window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api')
+  : '/api';
+
+// Helper function to convert sheet data to settings object
+const parseSettingsData = (rows: any[][]): Record<string, any> => {
+  if (!rows || rows.length <= 1) return {};
+  
+  const settings: Record<string, any> = {};
+  
+  // Skip header row
+  rows.slice(1).forEach(row => {
+    const key = row[0];
+    const value = row[1];
+    
+    if (key && value !== undefined) {
+      try {
+        settings[key] = JSON.parse(value);
+      } catch {
+        settings[key] = value;
+      }
+    }
+  });
+  
+  return settings;
+};
+
+// Read settings data from Google Sheets via Vercel API
+export const getSettingsData = async (): Promise<Record<string, any>> => {
+  try {
+    const response = await fetch(`${API_BASE}/settings`);
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return parseSettingsData(data.data || []);
+  } catch (error) {
+    console.error('Error fetching settings data:', error);
+    throw error;
+  }
+};
+
+// Save setting via Vercel API
+export const saveSetting = async (key: string, value: any, description?: string): Promise<void> => {
+  try {
+    const response = await fetch(`${API_BASE}/settings`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ key, value, description })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+
+    console.log('Setting saved successfully via Vercel API');
+  } catch (error) {
+    console.error('Error saving setting:', error);
+    throw error;
+  }
+};
+
+// Save multiple settings at once
+export const saveSettings = async (settings: Record<string, any>): Promise<void> => {
+  try {
+    const promises = Object.entries(settings).map(([key, value]) => 
+      saveSetting(key, value, `Setting for ${key}`)
+    );
+    
+    await Promise.all(promises);
+    console.log('All settings saved successfully');
+  } catch (error) {
+    console.error('Error saving settings:', error);
+    throw error;
+  }
+};

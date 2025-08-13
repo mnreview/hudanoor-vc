@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { UpdateLog } from "@/types/settings";
 import { formatDate } from "@/lib/utils";
+import { useLogs } from "@/hooks/use-logs";
 import { 
   Plus, 
   Calendar, 
@@ -21,10 +22,31 @@ import {
   Wrench, 
   Shield,
   Edit,
-  Trash2
+  Trash2,
+  Loader2
 } from "lucide-react";
 
 const mockUpdateLogs: UpdateLog[] = [
+  {
+    id: "19",
+    version: "1.4.5",
+    date: "2024-12-08",
+    title: "เพิ่มระบบจัดการ Update Logs สำหรับ Vercel API",
+    description: "สร้างไฟล์ vercel-logs.ts ใหม่ที่รองรับการจัดการ Update Logs ผ่าน Vercel API อย่างสมบูรณ์ รวมฟังก์ชันการอ่าน เพิ่ม แก้ไข และลบ logs พร้อมการแปลงข้อมูลจาก Google Sheets format ให้ระบบ Update Logs สามารถทำงานผ่าน Vercel Serverless Functions ได้",
+    type: "feature",
+    isImportant: true,
+    createdAt: "2024-12-08T23:59:59Z"
+  },
+  {
+    id: "18",
+    version: "1.4.4",
+    date: "2024-12-08",
+    title: "แก้ไขปัญหา TypeScript ในหน้าจัดการพนักงาน",
+    description: "แก้ไขปัญหา TypeScript error ในฟังก์ชัน refetch ที่ทำให้ปุ่ม 'ลองใหม่อีกครั้ง' ไม่ทำงานได้อย่างถูกต้อง โดยเปลี่ยนจาก onClick={refetch} เป็น onClick={() => refetch()} เพื่อให้สามารถเรียกใช้ฟังก์ชันได้อย่างถูกต้อง",
+    type: "bugfix",
+    isImportant: false,
+    createdAt: "2024-12-08T23:59:59Z"
+  },
   {
     id: "17",
     version: "1.4.3",

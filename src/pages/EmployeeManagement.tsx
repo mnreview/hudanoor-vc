@@ -14,13 +14,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Employee, EmployeeCommissionReport } from "@/types/employee";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useEmployees } from "@/hooks/use-employees";
-import { 
-  Plus, 
-  Users, 
-  Edit, 
-  Trash2, 
-  Phone, 
-  Mail, 
+import {
+  Plus,
+  Users,
+  Edit,
+  Trash2,
+  Phone,
+  Mail,
   MapPin,
   Calculator,
   TrendingUp,
@@ -46,7 +46,7 @@ const mockEmployees: Employee[] = [
     updatedAt: "2024-01-15T09:00:00Z"
   },
   {
-    id: "2", 
+    id: "2",
     name: "สมชาย รักงาน",
     position: "หัวหน้าขาย",
     salary: 25000,
@@ -76,7 +76,7 @@ const mockCommissionReports: EmployeeCommissionReport[] = [
   },
   {
     employeeId: "2",
-    employeeName: "สมชาย รักงาน", 
+    employeeName: "สมชาย รักงาน",
     period: "2024-12",
     storeSales: 80000,
     onlineSales: 45000,
@@ -120,7 +120,7 @@ export function EmployeeManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const employeeData = {
       name: formData.name,
       position: formData.position,
@@ -179,12 +179,46 @@ export function EmployeeManagement() {
     setIsAddDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setEmployees(employees.filter(emp => emp.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteEmployee(id);
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+    }
   };
 
   const activeEmployees = employees.filter(emp => emp.isActive);
   const totalSalary = activeEmployees.reduce((sum, emp) => sum + emp.salary, 0);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">กำลังโหลดข้อมูลพนักงาน...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">เกิดข้อผิดพลาด</h3>
+          <p className="text-muted-foreground mb-4">
+            ไม่สามารถโหลดข้อมูลพนักงานได้
+          </p>
+          <Button onClick={() => refetch()} variant="outline">
+            ลองใหม่อีกครั้ง
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -219,7 +253,7 @@ export function EmployeeManagement() {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
                   />
                 </div>
@@ -228,7 +262,7 @@ export function EmployeeManagement() {
                   <Input
                     id="position"
                     value={formData.position}
-                    onChange={(e) => setFormData({...formData, position: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                     required
                   />
                 </div>
@@ -241,7 +275,7 @@ export function EmployeeManagement() {
                     id="salary"
                     type="number"
                     value={formData.salary}
-                    onChange={(e) => setFormData({...formData, salary: Number(e.target.value)})}
+                    onChange={(e) => setFormData({ ...formData, salary: Number(e.target.value) })}
                     required
                   />
                 </div>
@@ -252,7 +286,7 @@ export function EmployeeManagement() {
                     type="number"
                     step="0.1"
                     value={formData.storeCommission}
-                    onChange={(e) => setFormData({...formData, storeCommission: Number(e.target.value)})}
+                    onChange={(e) => setFormData({ ...formData, storeCommission: Number(e.target.value) })}
                   />
                 </div>
                 <div>
@@ -262,7 +296,7 @@ export function EmployeeManagement() {
                     type="number"
                     step="0.1"
                     value={formData.onlineCommission}
-                    onChange={(e) => setFormData({...formData, onlineCommission: Number(e.target.value)})}
+                    onChange={(e) => setFormData({ ...formData, onlineCommission: Number(e.target.value) })}
                   />
                 </div>
               </div>
@@ -273,7 +307,7 @@ export function EmployeeManagement() {
                   <Input
                     id="phone"
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
                 </div>
                 <div>
@@ -282,7 +316,7 @@ export function EmployeeManagement() {
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </div>
               </div>
@@ -292,7 +326,7 @@ export function EmployeeManagement() {
                 <Textarea
                   id="address"
                   value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   rows={2}
                 />
               </div>
@@ -302,7 +336,7 @@ export function EmployeeManagement() {
                 <Textarea
                   id="note"
                   value={formData.note}
-                  onChange={(e) => setFormData({...formData, note: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                   rows={2}
                 />
               </div>
@@ -311,7 +345,7 @@ export function EmployeeManagement() {
                 <Switch
                   id="active"
                   checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData({...formData, isActive: checked})}
+                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
                 />
                 <Label htmlFor="active">พนักงานที่ยังทำงานอยู่</Label>
               </div>
@@ -335,8 +369,15 @@ export function EmployeeManagement() {
                 }}>
                   ยกเลิก
                 </Button>
-                <Button type="submit">
-                  {editingEmployee ? "บันทึกการแก้ไข" : "เพิ่มพนักงาน"}
+                <Button type="submit" disabled={isAddingEmployee || isUpdatingEmployee}>
+                  {(isAddingEmployee || isUpdatingEmployee) ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      กำลังบันทึก...
+                    </>
+                  ) : (
+                    editingEmployee ? "บันทึกการแก้ไข" : "เพิ่มพนักงาน"
+                  )}
                 </Button>
               </div>
             </form>
@@ -419,7 +460,7 @@ export function EmployeeManagement() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <Button
                         variant="ghost"
@@ -432,9 +473,14 @@ export function EmployeeManagement() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(employee.id)}
+                        disabled={isDeletingEmployee}
                         className="text-red-600 hover:text-red-700"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {isDeletingEmployee ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
                   </div>

@@ -26,6 +26,26 @@ import {
 
 const mockUpdateLogs: UpdateLog[] = [
   {
+    id: "17",
+    version: "1.4.3",
+    date: "2024-12-08",
+    title: "เชื่อมต่อหน้าจัดการพนักงานกับ Vercel API",
+    description: "อัปเดตหน้าจัดการพนักงานให้ใช้ useEmployees hook แทนการใช้ mock data ทำให้สามารถจัดการข้อมูลพนักงานจริงผ่าน Google Sheets ได้ รวมฟังก์ชันการเพิ่ม แก้ไข และลบพนักงาน พร้อมแสดงสถานะการโหลดและข้อผิดพลาด",
+    type: "improvement",
+    isImportant: true,
+    createdAt: "2024-12-08T23:59:59Z"
+  },
+  {
+    id: "16",
+    version: "1.4.2",
+    date: "2024-12-08",
+    title: "เพิ่มระบบจัดการพนักงานสำหรับ Vercel API",
+    description: "สร้างไฟล์ vercel-employees.ts ใหม่ที่รองรับการจัดการข้อมูลพนักงานผ่าน Vercel API อย่างสมบูรณ์ รวมฟังก์ชันการอ่าน เพิ่ม แก้ไข และลบข้อมูลพนักงาน พร้อมการทดสอบการเชื่อมต่อและการแปลงข้อมูลจาก Google Sheets format",
+    type: "feature",
+    isImportant: true,
+    createdAt: "2024-12-08T23:59:58Z"
+  },
+  {
     id: "15",
     version: "1.4.1",
     date: "2024-12-08",

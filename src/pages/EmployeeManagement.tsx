@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Employee, EmployeeCommissionReport } from "@/types/employee";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { useEmployees } from "@/hooks/use-employees";
 import { 
   Plus, 
   Users, 
@@ -24,7 +25,9 @@ import {
   Calculator,
   TrendingUp,
   Store,
-  Globe
+  Globe,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 
 const mockEmployees: Employee[] = [
@@ -86,7 +89,19 @@ const mockCommissionReports: EmployeeCommissionReport[] = [
 ];
 
 export function EmployeeManagement() {
-  const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
+  const {
+    employees,
+    isLoading,
+    error,
+    addEmployee,
+    updateEmployee,
+    deleteEmployee,
+    isAddingEmployee,
+    isUpdatingEmployee,
+    isDeletingEmployee,
+    refetch
+  } = useEmployees();
+
   const [commissionReports] = useState<EmployeeCommissionReport[]>(mockCommissionReports);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
@@ -103,38 +118,48 @@ export function EmployeeManagement() {
     isActive: true
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newEmployee: Employee = {
-      id: editingEmployee?.id || Date.now().toString(),
-      ...formData,
-      startDate: editingEmployee?.startDate || new Date().toISOString().split('T')[0],
-      createdAt: editingEmployee?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+    const employeeData = {
+      name: formData.name,
+      position: formData.position,
+      salary: formData.salary,
+      storeCommission: formData.storeCommission,
+      onlineCommission: formData.onlineCommission,
+      phone: formData.phone,
+      email: formData.email,
+      address: formData.address,
+      note: formData.note,
+      isActive: formData.isActive,
+      startDate: editingEmployee?.startDate || new Date().toISOString().split('T')[0]
     };
 
-    if (editingEmployee) {
-      setEmployees(employees.map(emp => emp.id === editingEmployee.id ? newEmployee : emp));
-    } else {
-      setEmployees([...employees, newEmployee]);
-    }
+    try {
+      if (editingEmployee) {
+        await updateEmployee({ employeeId: editingEmployee.id, updates: employeeData });
+      } else {
+        await addEmployee(employeeData);
+      }
 
-    // Reset form
-    setFormData({
-      name: "",
-      position: "",
-      salary: 0,
-      storeCommission: 0,
-      onlineCommission: 0,
-      phone: "",
-      email: "",
-      address: "",
-      note: "",
-      isActive: true
-    });
-    setIsAddDialogOpen(false);
-    setEditingEmployee(null);
+      // Reset form
+      setFormData({
+        name: "",
+        position: "",
+        salary: 0,
+        storeCommission: 0,
+        onlineCommission: 0,
+        phone: "",
+        email: "",
+        address: "",
+        note: "",
+        isActive: true
+      });
+      setIsAddDialogOpen(false);
+      setEditingEmployee(null);
+    } catch (error) {
+      console.error('Error submitting employee:', error);
+    }
   };
 
   const handleEdit = (employee: Employee) => {

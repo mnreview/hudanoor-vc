@@ -31,10 +31,59 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Spreadsheet ID not configured' });
     }
 
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: 'Tasks!A:H', // Tasks sheet with columns: ID, Title, Type, Amount, Note, DueDate, Completed, CreatedAt
-    });
+    // Try Tasks sheet first, fallback to creating a new sheet or using existing sheet
+    let response;
+    try {
+      response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: 'Tasks!A:H',
+      });
+    } catch (error) {
+      if (error.message.includes('Unable to parse range')) {
+        // Tasks sheet doesn't exist, try to create it
+        try {
+          await sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            resource: {
+              requests: [
+                {
+                  addSheet: {
+                    properties: {
+                      title: 'Tasks'
+                    }
+                  }
+                }
+              ]
+            }
+          });
+
+          // Add headers
+          await sheets.spreadsheets.values.update({
+            spreadsheetId,
+            range: 'Tasks!A1:H1',
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+              values: [['ID', 'Title', 'Type', 'Amount', 'Note', 'DueDate', 'Completed', 'CreatedAt']]
+            },
+          });
+
+          // Try reading again
+          response = await sheets.spreadsheets.values.get({
+            spreadsheetId,
+            range: 'Tasks!A:H',
+          });
+        } catch (createError) {
+          // Return empty data if can't create sheet
+          return res.status(200).json({ 
+            data: [['ID', 'Title', 'Type', 'Amount', 'Note', 'DueDate', 'Completed', 'CreatedAt']],
+            range: 'Tasks!A1:H1',
+            majorDimension: 'ROWS'
+          });
+        }
+      } else {
+        throw error;
+      }
+    }
 
     res.status(200).json({ 
       data: response.data.values || [],

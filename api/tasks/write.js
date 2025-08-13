@@ -52,14 +52,58 @@ export default async function handler(req, res) {
       now
     ];
 
-    const response = await sheets.spreadsheets.values.append({
-      spreadsheetId,
-      range: 'Tasks!A:H',
-      valueInputOption: 'USER_ENTERED',
-      resource: {
-        values: [values]
-      },
-    });
+    // Try to write to Tasks sheet, create if doesn't exist
+    let response;
+    try {
+      response = await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: 'Tasks!A:H',
+        valueInputOption: 'USER_ENTERED',
+        resource: {
+          values: [values]
+        },
+      });
+    } catch (error) {
+      if (error.message.includes('Unable to parse range')) {
+        // Tasks sheet doesn't exist, create it
+        await sheets.spreadsheets.batchUpdate({
+          spreadsheetId,
+          resource: {
+            requests: [
+              {
+                addSheet: {
+                  properties: {
+                    title: 'Tasks'
+                  }
+                }
+              }
+            ]
+          }
+        });
+
+        // Add headers
+        await sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range: 'Tasks!A1:H1',
+          valueInputOption: 'USER_ENTERED',
+          resource: {
+            values: [['ID', 'Title', 'Type', 'Amount', 'Note', 'DueDate', 'Completed', 'CreatedAt']]
+          },
+        });
+
+        // Try writing again
+        response = await sheets.spreadsheets.values.append({
+          spreadsheetId,
+          range: 'Tasks!A:H',
+          valueInputOption: 'USER_ENTERED',
+          resource: {
+            values: [values]
+          },
+        });
+      } else {
+        throw error;
+      }
+    }
 
     res.status(200).json({ 
       success: true,

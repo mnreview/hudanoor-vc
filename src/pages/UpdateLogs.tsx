@@ -26,6 +26,16 @@ import {
 
 const mockUpdateLogs: UpdateLog[] = [
   {
+    id: "14",
+    version: "1.4.0",
+    date: "2024-12-08",
+    title: "อัปเดต Tasks API endpoint ให้ใช้ unified data API",
+    description: "เปลี่ยน endpoint สำหรับการอ่านข้อมูล tasks จาก /api/tasks/read เป็น /api/data?type=tasks&action=read เพื่อให้สอดคล้องกับสถาปัตยกรรม unified API ที่ใช้ในระบบ Vercel ทำให้การจัดการ API endpoints มีความสม่ำเสมอและง่ายต่อการบำรุงรักษา",
+    type: "improvement",
+    isImportant: false,
+    createdAt: "2024-12-08T23:59:55Z"
+  },
+  {
     id: "13",
     version: "1.3.9",
     date: "2024-12-08",

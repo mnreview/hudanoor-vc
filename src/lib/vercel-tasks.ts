@@ -25,7 +25,7 @@ const parseTaskData = (rows: any[][]): TaskReminder[] => {
 // Read tasks data from Google Sheets via Vercel API
 export const getTasksData = async (): Promise<TaskReminder[]> => {
   try {
-    const response = await fetch(`${API_BASE}/tasks/read`);
+    const response = await fetch(`${API_BASE}/data?type=tasks&action=read`);
     
     if (!response.ok) {
       const errorData = await response.json();
@@ -52,7 +52,7 @@ export const addTaskRecord = async (task: Omit<TaskReminder, 'id' | 'createdAt'>
       completed: task.completed
     };
 
-    const response = await fetch(`${API_BASE}/tasks/write`, {
+    const response = await fetch(`${API_BASE}/data?type=tasks&action=write`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export const updateTaskRecord = async (taskId: string, updates: Partial<TaskRemi
     if (updates.dueDate !== undefined) updateData.dueDate = updates.dueDate.toISOString();
     if (updates.completed !== undefined) updateData.completed = updates.completed;
 
-    const response = await fetch(`${API_BASE}/tasks/update`, {
+    const response = await fetch(`${API_BASE}/data?type=tasks&action=update`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export const updateTaskRecord = async (taskId: string, updates: Partial<TaskRemi
 // Delete task via Vercel API
 export const deleteTaskRecord = async (taskId: string): Promise<void> => {
   try {
-    const response = await fetch(`${API_BASE}/tasks/delete`, {
+    const response = await fetch(`${API_BASE}/data?type=tasks&action=delete`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -52,8 +52,10 @@ export default async function handler(req, res) {
       now
     ];
 
-    // Try to write to Tasks sheet, create if doesn't exist
+    // Try to write to Tasks sheet, fallback to creating it or using existing sheet
     let response;
+    let usedSheet = 'Tasks';
+
     try {
       response = await sheets.spreadsheets.values.append({
         spreadsheetId,
@@ -65,41 +67,59 @@ export default async function handler(req, res) {
       });
     } catch (error) {
       if (error.message.includes('Unable to parse range')) {
-        // Tasks sheet doesn't exist, create it
-        await sheets.spreadsheets.batchUpdate({
-          spreadsheetId,
-          resource: {
-            requests: [
-              {
-                addSheet: {
-                  properties: {
-                    title: 'Tasks'
+        // Tasks sheet doesn't exist, try to create it
+        try {
+          await sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            resource: {
+              requests: [
+                {
+                  addSheet: {
+                    properties: {
+                      title: 'Tasks'
+                    }
                   }
                 }
-              }
-            ]
-          }
-        });
+              ]
+            }
+          });
 
-        // Add headers
-        await sheets.spreadsheets.values.update({
-          spreadsheetId,
-          range: 'Tasks!A1:H1',
-          valueInputOption: 'USER_ENTERED',
-          resource: {
-            values: [['ID', 'Title', 'Type', 'Amount', 'Note', 'DueDate', 'Completed', 'CreatedAt']]
-          },
-        });
+          // Add headers
+          await sheets.spreadsheets.values.update({
+            spreadsheetId,
+            range: 'Tasks!A1:H1',
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+              values: [['ID', 'Title', 'Type', 'Amount', 'Note', 'DueDate', 'Completed', 'CreatedAt']]
+            },
+          });
 
-        // Try writing again
-        response = await sheets.spreadsheets.values.append({
-          spreadsheetId,
-          range: 'Tasks!A:H',
-          valueInputOption: 'USER_ENTERED',
-          resource: {
-            values: [values]
-          },
-        });
+          // Try writing again
+          response = await sheets.spreadsheets.values.append({
+            spreadsheetId,
+            range: 'Tasks!A:H',
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+              values: [values]
+            },
+          });
+        } catch (createError) {
+          // If can't create Tasks sheet, use รายรับ sheet as fallback
+          console.log('Cannot create Tasks sheet, using รายรับ as fallback');
+          
+          // Add a prefix to identify this as task data
+          const fallbackValues = [`TASK_${taskId}`, ...values.slice(1)];
+          
+          response = await sheets.spreadsheets.values.append({
+            spreadsheetId,
+            range: 'รายรับ!A:K',
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+              values: [fallbackValues]
+            },
+          });
+          usedSheet = 'รายรับ (fallback)';
+        }
       } else {
         throw error;
       }

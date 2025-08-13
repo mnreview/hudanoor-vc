@@ -25,7 +25,7 @@ const parseTaskData = (rows: any[][]): TaskReminder[] => {
 // Read tasks data from Google Sheets via Vercel API
 export const getTasksData = async (): Promise<TaskReminder[]> => {
   try {
-    const response = await fetch(`${API_BASE}/data?type=tasks&action=read`);
+    const response = await fetch(`${API_BASE}/tasks`);
     
     if (!response.ok) {
       const errorData = await response.json();
@@ -52,7 +52,7 @@ export const addTaskRecord = async (task: Omit<TaskReminder, 'id' | 'createdAt'>
       completed: task.completed
     };
 
-    const response = await fetch(`${API_BASE}/data?type=tasks&action=write`, {
+    const response = await fetch(`${API_BASE}/tasks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

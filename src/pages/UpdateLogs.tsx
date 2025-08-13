@@ -26,6 +26,16 @@ import {
 
 const mockUpdateLogs: UpdateLog[] = [
   {
+    id: "15",
+    version: "1.4.1",
+    date: "2024-12-08",
+    title: "ปรับปรุง Tasks API endpoint ให้เรียบง่ายขึ้น",
+    description: "เปลี่ยน endpoint สำหรับการอ่านข้อมูล tasks จาก /api/data?type=tasks&action=read กลับเป็น /api/tasks เพื่อให้การเรียกใช้งานเรียบง่ายและตรงไปตรงมามากขึ้น ช่วยลดความซับซ้อนในการจัดการ API calls",
+    type: "improvement",
+    isImportant: false,
+    createdAt: "2024-12-08T23:59:58Z"
+  },
+  {
     id: "14",
     version: "1.4.0",
     date: "2024-12-08",

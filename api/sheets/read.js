@@ -16,22 +16,38 @@ export default async function handler(req, res) {
   }
 
   try {
+    const clientEmail = process.env.GOOGLE_CLIENT_EMAIL || process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n').replace(/"/g, '');
+    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID || process.env.GOOGLE_SHEETS_ID;
+
+    console.log('Debug info:', {
+      hasClientEmail: !!clientEmail,
+      hasPrivateKey: !!privateKey,
+      hasSpreadsheetId: !!spreadsheetId,
+      privateKeyStart: privateKey?.substring(0, 50) + '...'
+    });
+
+    if (!clientEmail || !privateKey || !spreadsheetId) {
+      return res.status(500).json({ 
+        error: 'Missing required environment variables',
+        missing: {
+          clientEmail: !clientEmail,
+          privateKey: !privateKey,
+          spreadsheetId: !spreadsheetId
+        }
+      });
+    }
+
     const auth = new google.auth.GoogleAuth({
       credentials: {
-        client_email: process.env.GOOGLE_CLIENT_EMAIL || process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        client_email: clientEmail,
+        private_key: privateKey,
       },
       scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
     });
 
     const sheets = google.sheets({ version: 'v4', auth });
-    
     const range = req.query.range || 'Sheet1!A:Z';
-    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID || process.env.GOOGLE_SHEETS_ID;
-
-    if (!spreadsheetId) {
-      return res.status(500).json({ error: 'Spreadsheet ID not configured' });
-    }
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,

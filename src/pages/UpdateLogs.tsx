@@ -26,6 +26,26 @@ import {
 
 const mockUpdateLogs: UpdateLog[] = [
   {
+    id: "13",
+    version: "1.3.9",
+    date: "2024-12-08",
+    title: "อัปเดต Task API ให้ใช้ Vercel API แทน Google Apps Script",
+    description: "เปลี่ยนฟังก์ชัน addTaskRecord ใน task-api.ts ให้ใช้ Vercel API โดยตรงแทนการเรียก Google Apps Script ผ่าน JSONP ทำให้ระบบ Task Management ทำงานผ่าน Vercel Serverless Functions อย่างสมบูรณ์และเสถียรมากขึ้น",
+    type: "improvement",
+    isImportant: true,
+    createdAt: "2024-12-08T23:59:50Z"
+  },
+  {
+    id: "11",
+    version: "1.3.7",
+    date: "2024-12-08",
+    title: "เพิ่มระบบ Task Management สำหรับ Vercel API",
+    description: "สร้างไฟล์ vercel-tasks.ts ใหม่ที่รองรับการจัดการ Task Reminders ผ่าน Vercel API อย่างสมบูรณ์ รวมฟังก์ชันการอ่าน เพิ่ม แก้ไข และลบ tasks พร้อมการทดสอบการเชื่อมต่อและการตั้งค่า sheet headers อัตโนมัติ",
+    type: "feature",
+    isImportant: true,
+    createdAt: "2024-12-08T23:59:45Z"
+  },
+  {
     id: "10",
     version: "1.3.6",
     date: "2024-12-08",

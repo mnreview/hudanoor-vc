@@ -13,6 +13,10 @@ export default async function handler(req, res) {
 
   const { type, action } = req.query;
 
+  if (!type || !action) {
+    return res.status(400).json({ error: 'Type and action parameters are required' });
+  }
+
   try {
     const auth = new google.auth.GoogleAuth({
       credentials: {
@@ -29,22 +33,21 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Spreadsheet ID not configured' });
     }
 
-    // Route based on type and action
-    switch (type) {
-      case 'tasks':
-        return await handleTasks(sheets, spreadsheetId, action, req, res);
-      case 'settings':
-        return await handleSettings(sheets, spreadsheetId, action, req, res);
-      case 'employees':
-        return await handleEmployees(sheets, spreadsheetId, action, req, res);
-      case 'logs':
-        return await handleLogs(sheets, spreadsheetId, action, req, res);
-      default:
-        return res.status(400).json({ error: 'Invalid type parameter' });
+    // Handle different types
+    if (type === 'tasks') {
+      return await handleTasks(sheets, spreadsheetId, action, req, res);
+    } else if (type === 'settings') {
+      return await handleSettings(sheets, spreadsheetId, action, req, res);
+    } else if (type === 'employees') {
+      return await handleEmployees(sheets, spreadsheetId, action, req, res);
+    } else if (type === 'logs') {
+      return await handleLogs(sheets, spreadsheetId, action, req, res);
+    } else {
+      return res.status(400).json({ error: 'Invalid type parameter' });
     }
   } catch (error) {
     console.error('Data API Error:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'API request failed',
       details: error.message 
     });
@@ -335,4 +338,217 @@ async function handleLogs(sheets, spreadsheetId, action, req, res) {
     default:
       return res.status(400).json({ error: 'Invalid action for logs' });
   }
+}
+// Tas
+ks handler
+async function handleTasks(sheets, spreadsheetId, action, req, res) {
+  const sheetName = 'Tasks';
+  const range = `${sheetName}!A:H`;
+
+  if (action === 'read') {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+    
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range,
+      });
+      return res.status(200).json({ 
+        data: response.data.values || [],
+        range: response.data.range
+      });
+    } catch (error) {
+      if (error.message.includes('Unable to parse range')) {
+        return res.status(200).json({ 
+          data: [['ID', 'Title', 'Type', 'Amount', 'Note', 'DueDate', 'Completed', 'CreatedAt']],
+          range: `${sheetName}!A1:H1`
+        });
+      }
+      throw error;
+    }
+  }
+
+  if (action === 'write') {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    const { task } = req.body;
+    if (!task) {
+      return res.status(400).json({ error: 'Task data is required' });
+    }
+
+    const taskId = `task_${Date.now()}`;
+    const values = [
+      taskId,
+      task.title,
+      task.type,
+      task.amount,
+      task.note || '',
+      task.dueDate,
+      task.completed ? 'เสร็จแล้ว' : 'รอดำเนินการ',
+      new Date().toISOString()
+    ];
+
+    try {
+      const response = await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range,
+        valueInputOption: 'USER_ENTERED',
+        resource: { values: [values] },
+      });
+
+      return res.status(200).json({ 
+        success: true,
+        taskId,
+        updatedRows: response.data.updates.updatedRows
+      });
+    } catch (error) {
+      if (error.message.includes('Unable to parse range')) {
+        return res.status(500).json({ 
+          error: 'Tasks sheet not found. Please create Tasks sheet first.',
+          details: error.message
+        });
+      }
+      throw error;
+    }
+  }
+
+  return res.status(400).json({ error: 'Invalid action for tasks' });
+}
+
+// Settings handler
+async function handleSettings(sheets, spreadsheetId, action, req, res) {
+  const sheetName = 'Settings';
+  const range = `${sheetName}!A:C`;
+
+  if (action === 'read') {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range,
+      });
+      return res.status(200).json({ 
+        data: response.data.values || [],
+        range: response.data.range
+      });
+    } catch (error) {
+      if (error.message.includes('Unable to parse range')) {
+        return res.status(200).json({ 
+          data: [['Key', 'Value', 'Description']],
+          range: `${sheetName}!A1:C1`
+        });
+      }
+      throw error;
+    }
+  }
+
+  if (action === 'write') {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    const { key, value, description } = req.body;
+    if (!key || value === undefined) {
+      return res.status(400).json({ error: 'Key and value are required' });
+    }
+
+    const values = [key, JSON.stringify(value), description || ''];
+    
+    try {
+      const response = await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range,
+        valueInputOption: 'USER_ENTERED',
+        resource: { values: [values] },
+      });
+
+      return res.status(200).json({ 
+        success: true,
+        updatedRows: response.data.updates.updatedRows
+      });
+    } catch (error) {
+      if (error.message.includes('Unable to parse range')) {
+        return res.status(500).json({ 
+          error: 'Settings sheet not found. Please create Settings sheet first.',
+          details: error.message
+        });
+      }
+      throw error;
+    }
+  }
+
+  return res.status(400).json({ error: 'Invalid action for settings' });
+}
+
+// Employees handler
+async function handleEmployees(sheets, spreadsheetId, action, req, res) {
+  const sheetName = 'Employees';
+  const range = `${sheetName}!A:H`;
+
+  if (action === 'read') {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range,
+      });
+      return res.status(200).json({ 
+        data: response.data.values || [],
+        range: response.data.range
+      });
+    } catch (error) {
+      if (error.message.includes('Unable to parse range')) {
+        return res.status(200).json({ 
+          data: [['ID', 'Name', 'Position', 'Email', 'Phone', 'HireDate', 'Salary', 'Status']],
+          range: `${sheetName}!A1:H1`
+        });
+      }
+      throw error;
+    }
+  }
+
+  return res.status(400).json({ error: 'Invalid action for employees' });
+}
+
+// Logs handler
+async function handleLogs(sheets, spreadsheetId, action, req, res) {
+  const sheetName = 'UpdateLogs';
+  const range = `${sheetName}!A:F`;
+
+  if (action === 'read') {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range,
+      });
+      return res.status(200).json({ 
+        data: response.data.values || [],
+        range: response.data.range
+      });
+    } catch (error) {
+      if (error.message.includes('Unable to parse range')) {
+        return res.status(200).json({ 
+          data: [['ID', 'Version', 'Date', 'Title', 'Description', 'Type']],
+          range: `${sheetName}!A1:F1`
+        });
+      }
+      throw error;
+    }
+  }
+
+  return res.status(400).json({ error: 'Invalid action for logs' });
 }

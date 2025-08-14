@@ -11,9 +11,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, Plus, CheckSquare } from "lucide-react";
+import { CalendarIcon, Plus, CheckSquare, Receipt } from "lucide-react";
 import { format, isToday, isTomorrow, isPast, differenceInDays } from "date-fns";
 import { th } from "date-fns/locale";
 import { toast } from "@/hooks/use-toast";
@@ -40,6 +41,14 @@ export function TaskReminder() {
     amount: 0,
     note: '',
     dueDate: new Date(),
+  });
+
+  const [expenseConfirmDialog, setExpenseConfirmDialog] = useState<{
+    isOpen: boolean;
+    task: TaskReminderType | null;
+  }>({
+    isOpen: false,
+    task: null,
   });
 
   const handleAddTask = () => {
@@ -74,8 +83,71 @@ export function TaskReminder() {
   const handleToggleComplete = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      updateTask({ taskId, updates: { completed: !task.completed } });
+      // If marking as complete and it's an expense task, ask if user wants to record it as expense
+      if (!task.completed && task.type === 'expense') {
+        setExpenseConfirmDialog({
+          isOpen: true,
+          task: task,
+        });
+      } else {
+        // For income tasks or unchecking completed tasks, just toggle
+        updateTask({ taskId, updates: { completed: !task.completed } });
+      }
     }
+  };
+
+  const handleConfirmExpenseRecord = async (shouldRecord: boolean) => {
+    const task = expenseConfirmDialog.task;
+    if (!task) return;
+
+    // Mark task as completed first
+    updateTask({ taskId: task.id, updates: { completed: true } });
+
+    if (shouldRecord) {
+      try {
+        // Create expense record
+        const expenseData = {
+          date: new Date().toISOString().split('T')[0], // Today's date
+          expense_item: task.title,
+          expense_category: 'อื่นๆ', // Default category
+          cost: task.amount,
+          channel: 'store', // Default channel
+          branch_or_platform: 'สาขาหลัก', // Default branch
+          note: task.note ? `จาก Task Reminder: ${task.note}` : 'จาก Task Reminder',
+        };
+
+        // Call expense API
+        const response = await fetch('/api/expenses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(expenseData),
+        });
+
+        if (response.ok) {
+          toast({
+            title: "บันทึกสำเร็จ",
+            description: "บันทึกรายจ่ายเรียบร้อยแล้ว",
+          });
+        } else {
+          throw new Error('Failed to record expense');
+        }
+      } catch (error) {
+        console.error('Error recording expense:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถบันทึกรายจ่ายได้ กรุณาบันทึกด้วยตนเอง",
+          variant: "destructive"
+        });
+      }
+    }
+
+    // Close dialog
+    setExpenseConfirmDialog({
+      isOpen: false,
+      task: null,
+    });
   };
 
   const handleDeleteTask = (taskId: string) => {
@@ -331,6 +403,51 @@ export function TaskReminder() {
           })
         )}
       </div>
+
+      {/* Expense Confirmation Dialog */}
+      <AlertDialog open={expenseConfirmDialog.isOpen} onOpenChange={(open) => {
+        if (!open) {
+          setExpenseConfirmDialog({ isOpen: false, task: null });
+        }
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Receipt className="h-5 w-5 text-orange-500" />
+              บันทึกรายจ่าย
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              คุณได้ทำ Task "{expenseConfirmDialog.task?.title}" เสร็จแล้ว
+              <br />
+              <br />
+              <strong>ต้องการบันทึกลงในรายการรายจ่ายด้วยไหม?</strong>
+              <br />
+              <br />
+              <div className="bg-muted p-3 rounded-lg mt-2">
+                <div className="text-sm">
+                  <div><strong>รายการ:</strong> {expenseConfirmDialog.task?.title}</div>
+                  <div><strong>จำนวน:</strong> {expenseConfirmDialog.task?.amount.toLocaleString()} บาท</div>
+                  {expenseConfirmDialog.task?.note && (
+                    <div><strong>หมายเหตุ:</strong> {expenseConfirmDialog.task.note}</div>
+                  )}
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => handleConfirmExpenseRecord(false)}>
+              ไม่บันทึก (เสร็จ Task เท่านั้น)
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => handleConfirmExpenseRecord(true)}
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              <Receipt className="h-4 w-4 mr-2" />
+              บันทึกรายจ่าย
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

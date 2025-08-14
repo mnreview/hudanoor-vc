@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { SummaryCards } from "@/components/dashboard/summary-cards";
+
 import { TrendChart } from "@/components/dashboard/trend-chart";
 import { CategoryChart } from "@/components/dashboard/category-chart";
 import { ChannelChart } from "@/components/dashboard/channel-chart";
@@ -374,8 +374,7 @@ const Index = () => {
           availableExpenseCategories={availableExpenseCategories}
         />
 
-        {/* Summary Cards */}
-        <SummaryCards summary={summary} />
+
 
         {/* Monthly Breakdown Chart */}
         <div className="mb-6">

@@ -1,5 +1,57 @@
 [
     {
+        "id": "log_1755149400000",
+        "version": "1.3.5",
+        "type": "improvement",
+        "title": "ปรับปรุงโค้ดและการแสดงผลกราฟแนวโน้มรายเดือน",
+        "description": "ทำความสะอาดโค้ดในคอมโพเนนต์กราฟแนวโน้มรายเดือน โดยลบ import ที่ไม่ได้ใช้งาน ปรับปรุงการจัดรูปแบบโค้ด และเพิ่มการรองรับ Dark Mode ให้ดีขึ้น",
+        "changes": [
+            "ลบ import Legend และ TrendingUp ที่ไม่ได้ใช้งานออก",
+            "ลบ import subMonths ที่ไม่จำเป็นออก",
+            "ปรับปรุงการจัดรูปแบบโค้ดให้เป็นระเบียบมากขึ้น",
+            "เพิ่มการรองรับ Dark Mode ในการ์ดสรุปข้อมูล",
+            "ปรับขนาดตัวอักษรในการ์ดสรุปจาก text-xl เป็น text-2xl",
+            "ปรับสีและความโปร่งใสของการ์ดให้เหมาะสมกับ Dark Mode"
+        ],
+        "technical_details": "ลบ unused imports (Legend, TrendingUp, subMonths), ปรับปรุง CSS classes สำหรับ dark mode support, เปลี่ยน text-xl เป็น text-2xl ในการ์ดสรุป, ปรับ background opacity และ border colors",
+        "impact": "โค้ดมีความเป็นระเบียบมากขึ้น ลดขนาดไฟล์ และการแสดงผลใน Dark Mode ดูสวยงามและอ่านง่ายขึ้น",
+        "date": "2025-08-14",
+        "time": "12:10:00"
+    },
+    {
+        "id": "log_1755149100000",
+        "version": "1.3.4",
+        "type": "improvement",
+        "title": "ปรับปรุงโครงสร้างโค้ดหน้า Dashboard หลัก",
+        "description": "ทำความสะอาดโค้ดในหน้า Dashboard หลัก โดยลบ import ที่ไม่ได้ใช้งานออก เพื่อให้โค้ดมีความเป็นระเบียบและลดขนาดไฟล์",
+        "changes": [
+            "ลบ import SummaryCards ที่ไม่ได้ใช้งานออกจาก Index.tsx",
+            "ปรับปรุงโครงสร้าง import statements ให้เป็นระเบียบ",
+            "ลดขนาดไฟล์และปรับปรุงประสิทธิภาพการโหลด"
+        ],
+        "technical_details": "ลบ import { SummaryCards } from '@/components/dashboard/summary-cards' ออกจาก src/pages/Index.tsx",
+        "impact": "โค้ดมีความเป็นระเบียบมากขึ้น ลดขนาดไฟล์ และปรับปรุงประสิทธิภาพการโหลดหน้าเว็บ",
+        "date": "2025-08-14",
+        "time": "12:05:00"
+    },
+    {
+        "id": "log_1755148800000",
+        "version": "1.3.3",
+        "type": "improvement",
+        "title": "เตรียมปรับปรุง UI ของหน้า Task Reminder",
+        "description": "เพิ่ม UI components ใหม่สำหรับปรับปรุงประสบการณ์การใช้งานในหน้า Task Reminder โดยเพิ่ม AlertDialog สำหรับการยืนยันการดำเนินการ และ DialogDescription สำหรับคำอธิบายที่ชัดเจนขึ้น",
+        "changes": [
+            "เพิ่ม AlertDialog components สำหรับการยืนยันการลบหรือแก้ไข task",
+            "เพิ่ม DialogDescription สำหรับคำอธิบายที่ชัดเจนในฟอร์ม",
+            "เพิ่ม Receipt icon สำหรับแสดงผลที่เกี่ยวข้องกับการเงิน",
+            "ปรับปรุง import statements ให้รองรับ UI components ใหม่"
+        ],
+        "technical_details": "เพิ่ม import สำหรับ DialogDescription, AlertDialog และ components ที่เกี่ยวข้อง, เพิ่ม Receipt icon จาก lucide-react ใน src/pages/TaskReminder.tsx",
+        "impact": "เตรียมพื้นฐานสำหรับการปรับปรุง UX ในการจัดการ task reminders ให้มีการยืนยันและคำอธิบายที่ชัดเจนขึ้น",
+        "date": "2025-08-14",
+        "time": "12:00:00"
+    },
+    {
         "id": "log_1755148500000",
         "version": "1.3.2",
         "type": "improvement",

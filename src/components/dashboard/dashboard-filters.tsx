@@ -45,45 +45,45 @@ export function DashboardFilters({
   // Helper function to get current date range preset
   const getDateRangePreset = (filters: FilterOptions): string => {
     if (!filters.dateFrom && !filters.dateTo) return 'all';
-    
+
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
+
     // Check for 7 days ago
     const last7Days = new Date(today);
     last7Days.setDate(last7Days.getDate() - 7);
     if (filters.dateFrom === last7Days.toISOString() && filters.dateTo === today.toISOString()) {
       return 'last7days';
     }
-    
+
     // Check for 30 days ago
     const last30Days = new Date(today);
     last30Days.setDate(last30Days.getDate() - 30);
     if (filters.dateFrom === last30Days.toISOString() && filters.dateTo === today.toISOString()) {
       return 'last30days';
     }
-    
+
     // Check for last month
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
     if (filters.dateFrom === lastMonthStart.toISOString() && filters.dateTo === lastMonthEnd.toISOString()) {
       return 'lastMonth';
     }
-    
+
     // Check for last year
     const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
     const lastYearEnd = new Date(now.getFullYear() - 1, 11, 31);
     if (filters.dateFrom === lastYearStart.toISOString() && filters.dateTo === lastYearEnd.toISOString()) {
       return 'lastYear';
     }
-    
+
     // Check for this year
     const thisYearStart = new Date(now.getFullYear(), 0, 1);
     const thisYearEnd = new Date(now.getFullYear(), 11, 31);
     if (filters.dateFrom === thisYearStart.toISOString() && filters.dateTo === thisYearEnd.toISOString()) {
       return 'thisYear';
     }
-    
+
     return 'custom';
   };
 
@@ -91,66 +91,66 @@ export function DashboardFilters({
   const handleDateRangePreset = (preset: string) => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
+
     switch (preset) {
       case 'all':
         onFiltersChange({ ...filters, dateFrom: undefined, dateTo: undefined });
         break;
-        
+
       case 'last7days':
         const last7Days = new Date(today);
         last7Days.setDate(last7Days.getDate() - 7);
-        onFiltersChange({ 
-          ...filters, 
-          dateFrom: last7Days.toISOString(), 
-          dateTo: today.toISOString() 
+        onFiltersChange({
+          ...filters,
+          dateFrom: last7Days.toISOString(),
+          dateTo: today.toISOString()
         });
         break;
-        
+
       case 'last30days':
         const last30Days = new Date(today);
         last30Days.setDate(last30Days.getDate() - 30);
-        onFiltersChange({ 
-          ...filters, 
-          dateFrom: last30Days.toISOString(), 
-          dateTo: today.toISOString() 
+        onFiltersChange({
+          ...filters,
+          dateFrom: last30Days.toISOString(),
+          dateTo: today.toISOString()
         });
         break;
-        
+
       case 'lastMonth':
         const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-        onFiltersChange({ 
-          ...filters, 
-          dateFrom: lastMonthStart.toISOString(), 
-          dateTo: lastMonthEnd.toISOString() 
+        onFiltersChange({
+          ...filters,
+          dateFrom: lastMonthStart.toISOString(),
+          dateTo: lastMonthEnd.toISOString()
         });
         break;
-        
+
       case 'lastYear':
         const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
         const lastYearEnd = new Date(now.getFullYear() - 1, 11, 31);
-        onFiltersChange({ 
-          ...filters, 
-          dateFrom: lastYearStart.toISOString(), 
-          dateTo: lastYearEnd.toISOString() 
+        onFiltersChange({
+          ...filters,
+          dateFrom: lastYearStart.toISOString(),
+          dateTo: lastYearEnd.toISOString()
         });
         break;
-        
+
       case 'thisYear':
         const thisYearStart = new Date(now.getFullYear(), 0, 1);
         const thisYearEnd = new Date(now.getFullYear(), 11, 31);
-        onFiltersChange({ 
-          ...filters, 
-          dateFrom: thisYearStart.toISOString(), 
-          dateTo: thisYearEnd.toISOString() 
+        onFiltersChange({
+          ...filters,
+          dateFrom: thisYearStart.toISOString(),
+          dateTo: thisYearEnd.toISOString()
         });
         break;
-        
+
       case 'custom':
         // Keep current dates or clear them
         break;
-        
+
       default:
         break;
     }
@@ -166,7 +166,7 @@ export function DashboardFilters({
         newFilters.dateTo = date.toISOString();
       }
       onFiltersChange(newFilters);
-      
+
       // Close the date picker
       setDatePickerOpen(prev => ({ ...prev, [type]: false }));
     }
@@ -175,7 +175,7 @@ export function DashboardFilters({
   // Get date range label for display
   const getDateRangeLabel = (filters: FilterOptions): string => {
     const preset = getDateRangePreset(filters);
-    
+
     switch (preset) {
       case 'last7days':
         return '7 วันที่ผ่านมา';
@@ -217,7 +217,7 @@ export function DashboardFilters({
 
       {/* Filters Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        
+
         {/* Date Range Filter */}
         <Card className="p-4">
           <Label className="text-sm font-medium mb-2 block">ช่วงวันที่</Label>
@@ -235,7 +235,7 @@ export function DashboardFilters({
               <SelectItem value="custom">กำหนดเอง</SelectItem>
             </SelectContent>
           </Select>
-          
+
           {/* Custom Date Range */}
           {getDateRangePreset(filters) === 'custom' && (
             <div className="mt-2 space-y-2">
@@ -288,11 +288,11 @@ export function DashboardFilters({
         {/* Channel Filter */}
         <Card className="p-4">
           <Label className="text-sm font-medium mb-2 block">ช่องทางขาย</Label>
-          <Select 
-            value={filters.channels?.[0] || "all"} 
-            onValueChange={(value) => onFiltersChange({ 
-              ...filters, 
-              channels: value === "all" ? [] : [value] 
+          <Select
+            value={filters.channels?.[0] || "all"}
+            onValueChange={(value) => onFiltersChange({
+              ...filters,
+              channels: value === "all" ? [] : [value]
             })}
           >
             <SelectTrigger className="h-9">
@@ -309,11 +309,11 @@ export function DashboardFilters({
         {/* Branch/Platform Filter */}
         <Card className="p-4">
           <Label className="text-sm font-medium mb-2 block">สาขา/แพลตฟอร์ม</Label>
-          <Select 
-            value={filters.branches?.[0] || "all"} 
-            onValueChange={(value) => onFiltersChange({ 
-              ...filters, 
-              branches: value === "all" ? [] : [value] 
+          <Select
+            value={filters.branches?.[0] || "all"}
+            onValueChange={(value) => onFiltersChange({
+              ...filters,
+              branches: value === "all" ? [] : [value]
             })}
           >
             <SelectTrigger className="h-9">
@@ -321,7 +321,7 @@ export function DashboardFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">ทั้งหมด</SelectItem>
-              {availableBranches.map(branch => (
+              {availableBranches.filter(branch => branch && branch.trim() !== '').map(branch => (
                 <SelectItem key={branch} value={branch}>{branch}</SelectItem>
               ))}
             </SelectContent>
@@ -331,11 +331,11 @@ export function DashboardFilters({
         {/* Product Categories Filter */}
         <Card className="p-4">
           <Label className="text-sm font-medium mb-2 block">หมวดหมู่สินค้า</Label>
-          <Select 
-            value={filters.productCategories?.[0] || "all"} 
-            onValueChange={(value) => onFiltersChange({ 
-              ...filters, 
-              productCategories: value === "all" ? [] : [value] 
+          <Select
+            value={filters.productCategories?.[0] || "all"}
+            onValueChange={(value) => onFiltersChange({
+              ...filters,
+              productCategories: value === "all" ? [] : [value]
             })}
           >
             <SelectTrigger className="h-9">
@@ -343,7 +343,7 @@ export function DashboardFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">ทั้งหมด</SelectItem>
-              {availableProductCategories.map(category => (
+              {availableProductCategories.filter(category => category && category.trim() !== '').map(category => (
                 <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}
             </SelectContent>
@@ -353,11 +353,11 @@ export function DashboardFilters({
         {/* Expense Categories Filter */}
         <Card className="p-4">
           <Label className="text-sm font-medium mb-2 block">หมวดหมู่จ่าย</Label>
-          <Select 
-            value={filters.expenseCategories?.[0] || "all"} 
-            onValueChange={(value) => onFiltersChange({ 
-              ...filters, 
-              expenseCategories: value === "all" ? [] : [value] 
+          <Select
+            value={filters.expenseCategories?.[0] || "all"}
+            onValueChange={(value) => onFiltersChange({
+              ...filters,
+              expenseCategories: value === "all" ? [] : [value]
             })}
           >
             <SelectTrigger className="h-9">
@@ -365,7 +365,7 @@ export function DashboardFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">ทั้งหมด</SelectItem>
-              {availableExpenseCategories.map(category => (
+              {availableExpenseCategories.filter(category => category && category.trim() !== '').map(category => (
                 <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}
             </SelectContent>
@@ -392,11 +392,11 @@ export function DashboardFilters({
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2 pt-2 border-t">
           <span className="text-sm text-muted-foreground">ตัวกรองที่ใช้งาน:</span>
-          
+
           {getDateRangeLabel(filters) && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
               📅 {getDateRangeLabel(filters)}
-              <button 
+              <button
                 onClick={() => onFiltersChange({ ...filters, dateFrom: undefined, dateTo: undefined })}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
@@ -404,11 +404,11 @@ export function DashboardFilters({
               </button>
             </span>
           )}
-          
+
           {filters.channels?.[0] && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
               🏪 {filters.channels[0] === 'store' ? 'หน้าร้าน' : 'ออนไลน์'}
-              <button 
+              <button
                 onClick={() => onFiltersChange({ ...filters, channels: [] })}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
@@ -416,11 +416,11 @@ export function DashboardFilters({
               </button>
             </span>
           )}
-          
+
           {filters.branches?.[0] && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
               🏢 {filters.branches[0]}
-              <button 
+              <button
                 onClick={() => onFiltersChange({ ...filters, branches: [] })}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
@@ -428,11 +428,11 @@ export function DashboardFilters({
               </button>
             </span>
           )}
-          
+
           {filters.productCategories?.[0] && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
               📦 {filters.productCategories[0]}
-              <button 
+              <button
                 onClick={() => onFiltersChange({ ...filters, productCategories: [] })}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
@@ -440,11 +440,11 @@ export function DashboardFilters({
               </button>
             </span>
           )}
-          
+
           {filters.expenseCategories?.[0] && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
               💰 {filters.expenseCategories[0]}
-              <button 
+              <button
                 onClick={() => onFiltersChange({ ...filters, expenseCategories: [] })}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
@@ -452,11 +452,11 @@ export function DashboardFilters({
               </button>
             </span>
           )}
-          
+
           {filters.q && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
               🔍 "{filters.q}"
-              <button 
+              <button
                 onClick={() => onFiltersChange({ ...filters, q: undefined })}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >

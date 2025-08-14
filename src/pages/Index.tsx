@@ -95,17 +95,17 @@ const Index = () => {
     const branches = new Set([
       ...incomeData.map(item => item.branch_or_platform),
       ...expenseData.map(item => item.branch_or_platform)
-    ]);
+    ].filter(branch => branch && branch.trim() !== ''));
     return Array.from(branches).sort();
   }, [incomeData, expenseData]);
 
   const availableProductCategories = useMemo(() => {
-    const categories = new Set(incomeData.map(item => item.product_category));
+    const categories = new Set(incomeData.map(item => item.product_category).filter(category => category && category.trim() !== ''));
     return Array.from(categories).sort();
   }, [incomeData]);
 
   const availableExpenseCategories = useMemo(() => {
-    const categories = new Set(expenseData.map(item => item.expense_category));
+    const categories = new Set(expenseData.map(item => item.expense_category).filter(category => category && category.trim() !== ''));
     return Array.from(categories).sort();
   }, [expenseData]);
 

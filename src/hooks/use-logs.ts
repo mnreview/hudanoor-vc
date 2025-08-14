@@ -1,12 +1,68 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  getLogsData, 
-  addLogRecord, 
-  updateLogRecord, 
-  deleteLogRecord 
-} from '@/lib/vercel-logs';
 import { UpdateLog } from '@/types/settings';
 import { toast } from '@/hooks/use-toast';
+
+// Local API functions for JSON-based logs
+const getLogsData = async (): Promise<UpdateLog[]> => {
+  const response = await fetch('/api/logs');
+  const result = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(result.error || 'Failed to fetch logs');
+  }
+  
+  return result.data || [];
+};
+
+const addLogRecord = async (logData: Partial<UpdateLog>): Promise<any> => {
+  const response = await fetch('/api/logs', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ log: logData }),
+  });
+
+  const result = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(result.error || 'Failed to add log');
+  }
+  
+  return result;
+};
+
+const updateLogRecord = async (logId: string, updates: Partial<UpdateLog>): Promise<any> => {
+  const response = await fetch('/api/logs', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ logId, updates }),
+  });
+
+  const result = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(result.error || 'Failed to update log');
+  }
+  
+  return result;
+};
+
+const deleteLogRecord = async (logId: string): Promise<any> => {
+  const response = await fetch(`/api/logs?logId=${logId}`, {
+    method: 'DELETE',
+  });
+
+  const result = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(result.error || 'Failed to delete log');
+  }
+  
+  return result;
+};
 
 export const useLogs = () => {
   const queryClient = useQueryClient();
@@ -32,7 +88,7 @@ export const useLogs = () => {
       
       toast({
         title: "เพิ่ม Update Log สำเร็จ",
-        description: "บันทึกข้อมูลลง Google Sheets แล้ว"
+        description: "บันทึกข้อมูลในระบบแล้ว"
       });
     },
     onError: (error) => {
@@ -75,7 +131,7 @@ export const useLogs = () => {
       
       toast({
         title: "ลบ Update Log สำเร็จ",
-        description: "ลบรายการออกจาก Google Sheets แล้ว"
+        description: "ลบรายการออกจากระบบแล้ว"
       });
     },
     onError: (error) => {

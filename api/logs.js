@@ -1,4 +1,42 @@
-import { google } from 'googleapis';
+import fs from 'fs';
+import path from 'path';
+
+const LOGS_FILE_PATH = path.join(process.cwd(), 'src/data/update-logs.json');
+
+// Ensure the data directory exists
+function ensureDataDirectory() {
+  const dataDir = path.dirname(LOGS_FILE_PATH);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+}
+
+// Read logs from JSON file
+function readLogs() {
+  try {
+    ensureDataDirectory();
+    if (!fs.existsSync(LOGS_FILE_PATH)) {
+      return [];
+    }
+    const data = fs.readFileSync(LOGS_FILE_PATH, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading logs:', error);
+    return [];
+  }
+}
+
+// Write logs to JSON file
+function writeLogs(logs) {
+  try {
+    ensureDataDirectory();
+    fs.writeFileSync(LOGS_FILE_PATH, JSON.stringify(logs, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error('Error writing logs:', error);
+    return false;
+  }
+}
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -12,46 +50,22 @@ export default async function handler(req, res) {
   }
 
   try {
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: process.env.GOOGLE_CLIENT_EMAIL || process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n').replace(/"/g, ''),
-      },
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-
-    const sheets = google.sheets({ version: 'v4', auth });
-    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID || process.env.GOOGLE_SHEETS_ID;
-
-    if (!spreadsheetId) {
-      return res.status(500).json({ error: 'Spreadsheet ID not configured' });
-    }
-
-    const sheetName = 'UpdateLogs';
-    const range = `${sheetName}!A:F`;
-
     // Handle GET request (read logs)
     if (req.method === 'GET') {
-      try {
-        const response = await sheets.spreadsheets.values.get({
-          spreadsheetId,
-          range,
-        });
-        
-        return res.status(200).json({ 
-          data: response.data.values || [],
-          range: response.data.range
-        });
-      } catch (error) {
-        if (error.message.includes('Unable to parse range')) {
-          return res.status(200).json({ 
-            data: [['ID', 'Version', 'Date', 'Title', 'Description', 'Type']],
-            range: `${sheetName}!A1:F1`,
-            message: 'UpdateLogs sheet not found, returning headers only'
-          });
-        }
-        throw error;
-      }
+      const logs = readLogs();
+      
+      // Sort by date and time (newest first)
+      const sortedLogs = logs.sort((a, b) => {
+        const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
+        const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
+        return dateB - dateA;
+      });
+
+      return res.status(200).json({ 
+        data: sortedLogs,
+        total: sortedLogs.length,
+        source: 'local_json'
+      });
     }
 
     // Handle POST request (add log)
@@ -62,37 +76,36 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Log data is required' });
       }
 
-      const logId = log.id || `log_${Date.now()}`;
-      const values = [
-        logId,
-        log.version || '',
-        log.date || new Date().toISOString().split('T')[0],
-        log.title || '',
-        log.description || '',
-        log.type || 'improvement'
-      ];
+      const logs = readLogs();
+      
+      const newLog = {
+        id: log.id || `log_${Date.now()}`,
+        version: log.version || '',
+        type: log.type || 'improvement',
+        title: log.title || '',
+        description: log.description || '',
+        changes: log.changes || [],
+        technical_details: log.technical_details || '',
+        impact: log.impact || '',
+        date: log.date || new Date().toISOString().split('T')[0],
+        time: log.time || new Date().toLocaleTimeString('th-TH', { hour12: false })
+      };
 
-      try {
-        const response = await sheets.spreadsheets.values.append({
-          spreadsheetId,
-          range,
-          valueInputOption: 'USER_ENTERED',
-          resource: { values: [values] },
-        });
+      // Add to beginning of array (newest first)
+      logs.unshift(newLog);
 
+      const success = writeLogs(logs);
+      
+      if (success) {
         return res.status(200).json({ 
           success: true,
-          logId,
-          updatedRows: response.data.updates?.updatedRows || 1
+          logId: newLog.id,
+          message: 'Log added successfully'
         });
-      } catch (error) {
-        if (error.message.includes('Unable to parse range')) {
-          return res.status(500).json({ 
-            error: 'UpdateLogs sheet not found. Please create UpdateLogs sheet in your Google Sheets first.',
-            details: error.message
-          });
-        }
-        throw error;
+      } else {
+        return res.status(500).json({ 
+          error: 'Failed to save log'
+        });
       }
     }
 
@@ -104,12 +117,29 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Log ID and updates are required' });
       }
 
-      // For now, return success (full update implementation would require finding the row)
-      return res.status(200).json({ 
-        success: true,
-        message: 'Log update functionality simplified',
-        logId
-      });
+      const logs = readLogs();
+      const logIndex = logs.findIndex(log => log.id === logId);
+      
+      if (logIndex === -1) {
+        return res.status(404).json({ error: 'Log not found' });
+      }
+
+      // Update the log
+      logs[logIndex] = { ...logs[logIndex], ...updates };
+      
+      const success = writeLogs(logs);
+      
+      if (success) {
+        return res.status(200).json({ 
+          success: true,
+          logId,
+          message: 'Log updated successfully'
+        });
+      } else {
+        return res.status(500).json({ 
+          error: 'Failed to update log'
+        });
+      }
     }
 
     // Handle DELETE request (delete log)
@@ -120,12 +150,26 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Log ID is required' });
       }
 
-      // For now, return success (full delete implementation would require finding the row)
-      return res.status(200).json({ 
-        success: true,
-        message: 'Log delete functionality simplified',
-        logId
-      });
+      const logs = readLogs();
+      const filteredLogs = logs.filter(log => log.id !== logId);
+      
+      if (filteredLogs.length === logs.length) {
+        return res.status(404).json({ error: 'Log not found' });
+      }
+
+      const success = writeLogs(filteredLogs);
+      
+      if (success) {
+        return res.status(200).json({ 
+          success: true,
+          logId,
+          message: 'Log deleted successfully'
+        });
+      } else {
+        return res.status(500).json({ 
+          error: 'Failed to delete log'
+        });
+      }
     }
 
     return res.status(405).json({ error: 'Method not allowed' });

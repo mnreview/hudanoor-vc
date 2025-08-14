@@ -322,9 +322,40 @@ export function UpdateLogs() {
                 </div>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-base leading-relaxed">
+                <CardDescription className="text-base leading-relaxed whitespace-pre-line">
                   {log.description}
                 </CardDescription>
+                
+                {/* Show changes if available */}
+                {log.changes && Array.isArray(log.changes) && log.changes.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium mb-2">การเปลี่ยนแปลง:</h4>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      {log.changes.map((change, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="text-green-500 mt-1">•</span>
+                          <span>{change}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {/* Show technical details if available */}
+                {log.technical_details && (
+                  <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                    <h4 className="text-sm font-medium mb-1">รายละเอียดทางเทคนิค:</h4>
+                    <p className="text-sm text-muted-foreground">{log.technical_details}</p>
+                  </div>
+                )}
+                
+                {/* Show impact if available */}
+                {log.impact && (
+                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                    <h4 className="text-sm font-medium mb-1 text-blue-700 dark:text-blue-300">ผลกระทบ:</h4>
+                    <p className="text-sm text-blue-600 dark:text-blue-400">{log.impact}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           );

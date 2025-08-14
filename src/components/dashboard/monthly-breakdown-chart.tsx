@@ -161,44 +161,87 @@ export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: Mont
       
       {isExpanded && (
         <CardContent>
-          {/* Legend Controls */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            <Button
-              variant={visibleLines.income ? "default" : "outline"}
-              size="sm"
+          {/* Summary Stats - Clickable Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div 
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-4 border-2 ${
+                visibleLines.income 
+                  ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 shadow-md' 
+                  : 'bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-800'
+              }`}
               onClick={() => toggleLine('income')}
-              className={visibleLines.income ? "bg-blue-500 hover:bg-blue-600" : ""}
             >
-              <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-              ยอดขาย
-            </Button>
-            <Button
-              variant={visibleLines.expense ? "default" : "outline"}
-              size="sm"
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-muted-foreground">ยอดขายรวม</div>
+                <div className={`w-3 h-3 rounded-full ${visibleLines.income ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+              </div>
+              <div className="text-xl font-bold text-blue-600">
+                {formatCurrency(monthlyData.reduce((sum, item) => sum + item.income, 0))}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {visibleLines.income ? 'คลิกเพื่อซ่อน' : 'คลิกเพื่อแสดง'}
+              </div>
+            </div>
+            
+            <div 
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-4 border-2 ${
+                visibleLines.expense 
+                  ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800 shadow-md' 
+                  : 'bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:border-red-200 dark:hover:border-red-800'
+              }`}
               onClick={() => toggleLine('expense')}
-              className={visibleLines.expense ? "bg-red-500 hover:bg-red-600" : ""}
             >
-              <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-              ค่าใช้จ่าย
-            </Button>
-            <Button
-              variant={visibleLines.profit ? "default" : "outline"}
-              size="sm"
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-muted-foreground">ค่าใช้จ่ายรวม</div>
+                <div className={`w-3 h-3 rounded-full ${visibleLines.expense ? 'bg-red-500' : 'bg-gray-300'}`}></div>
+              </div>
+              <div className="text-xl font-bold text-red-600">
+                {formatCurrency(monthlyData.reduce((sum, item) => sum + item.expense, 0))}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {visibleLines.expense ? 'คลิกเพื่อซ่อน' : 'คลิกเพื่อแสดง'}
+              </div>
+            </div>
+            
+            <div 
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-4 border-2 ${
+                visibleLines.profit 
+                  ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800 shadow-md' 
+                  : 'bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:border-green-200 dark:hover:border-green-800'
+              }`}
               onClick={() => toggleLine('profit')}
-              className={visibleLines.profit ? "bg-green-500 hover:bg-green-600" : ""}
             >
-              <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-              กำไร
-            </Button>
-            <Button
-              variant={visibleLines.quantity ? "default" : "outline"}
-              size="sm"
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-muted-foreground">กำไรรวม</div>
+                <div className={`w-3 h-3 rounded-full ${visibleLines.profit ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+              </div>
+              <div className="text-xl font-bold text-green-600">
+                {formatCurrency(monthlyData.reduce((sum, item) => sum + item.profit, 0))}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {visibleLines.profit ? 'คลิกเพื่อซ่อน' : 'คลิกเพื่อแสดง'}
+              </div>
+            </div>
+            
+            <div 
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-4 border-2 ${
+                visibleLines.quantity 
+                  ? 'bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800 shadow-md' 
+                  : 'bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:border-orange-200 dark:hover:border-orange-800'
+              }`}
               onClick={() => toggleLine('quantity')}
-              className={visibleLines.quantity ? "bg-orange-500 hover:bg-orange-600" : ""}
             >
-              <div className="w-3 h-3 rounded-full bg-orange-500 mr-2"></div>
-              จำนวนชิ้น
-            </Button>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-muted-foreground">ชิ้นรวม</div>
+                <div className={`w-3 h-3 rounded-full ${visibleLines.quantity ? 'bg-orange-500' : 'bg-gray-300'}`}></div>
+              </div>
+              <div className="text-xl font-bold text-orange-600">
+                {monthlyData.reduce((sum, item) => sum + item.quantity, 0).toLocaleString()} ชิ้น
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {visibleLines.quantity ? 'คลิกเพื่อซ่อน' : 'คลิกเพื่อแสดง'}
+              </div>
+            </div>
           </div>
 
           {/* Chart */}
@@ -279,34 +322,6 @@ export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: Mont
                 )}
               </LineChart>
             </ResponsiveContainer>
-          </div>
-
-          {/* Summary Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-            <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
-              <div className="text-sm text-muted-foreground">ยอดขายรวม</div>
-              <div className="text-lg font-bold text-blue-600">
-                {formatCurrency(monthlyData.reduce((sum, item) => sum + item.income, 0))}
-              </div>
-            </div>
-            <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 border border-red-100 dark:border-red-800">
-              <div className="text-sm text-muted-foreground">ค่าใช้จ่ายรวม</div>
-              <div className="text-lg font-bold text-red-600">
-                {formatCurrency(monthlyData.reduce((sum, item) => sum + item.expense, 0))}
-              </div>
-            </div>
-            <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 border border-green-100 dark:border-green-800">
-              <div className="text-sm text-muted-foreground">กำไรรวม</div>
-              <div className="text-lg font-bold text-green-600">
-                {formatCurrency(monthlyData.reduce((sum, item) => sum + item.profit, 0))}
-              </div>
-            </div>
-            <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 border border-orange-100 dark:border-orange-800">
-              <div className="text-sm text-muted-foreground">ชิ้นรวม</div>
-              <div className="text-lg font-bold text-orange-600">
-                {monthlyData.reduce((sum, item) => sum + item.quantity, 0).toLocaleString()} ชิ้น
-              </div>
-            </div>
           </div>
         </CardContent>
       )}

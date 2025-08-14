@@ -64,7 +64,7 @@ const parseSettingsData = (rows: any[][]): AppSettings | null => {
     storeEmail: settingsRow[7] || '',
     currency: settingsRow[8] || 'THB',
     dateFormat: settingsRow[9] || 'DD/MM/YYYY',
-    defaultSalesTarget: parseFloat(settingsRow[10]) || 15000,
+    defaultSalesTarget: parseFloat(settingsRow[10]) || 200000,
     incomeFormFields: [], // จะเพิ่มในอนาคต
     expenseFormFields: [], // จะเพิ่มในอนาคต
     createdAt: settingsRow[11] || new Date().toISOString(),

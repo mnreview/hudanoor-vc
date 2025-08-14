@@ -7,11 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSettings } from "@/hooks/use-settings";
-import { 
-  Settings as SettingsIcon, 
-  Store, 
-  Palette, 
-  FileText, 
+import {
+  Settings as SettingsIcon,
+  Store,
+  Palette,
+  FileText,
   Save,
   Check,
   RotateCcw,
@@ -35,7 +35,7 @@ const colorOptions = [
 export function AppSettings() {
   const { settings, isLoading, saveSettings, isSaving } = useSettings();
   const [localSettings, setLocalSettings] = useState(settings);
-  
+
   // State สำหรับการเพิ่มตัวเลือกใหม่
   const [newChannel, setNewChannel] = useState('');
   const [newBranch, setNewBranch] = useState('');
@@ -132,13 +132,14 @@ export function AppSettings() {
       storeEmail: "",
       currency: "THB",
       dateFormat: "DD/MM/YYYY",
-      defaultSalesTarget: 15000,
+      defaultSalesTarget: 200000,
+      monthlyTarget: 200000,
       channels: ["หน้าร้าน", "ออนไลน์"],
       branches: ["สาขาหลัก"],
       productCategories: ["เสื้อผ้า", "อุปกรณ์", "อื่นๆ"],
       expenseCategories: ["ค่าเช่า", "ค่าไฟ", "วัตถุดิบ", "อื่นๆ"]
     };
-    
+
     setLocalSettings({ ...localSettings, ...defaultSettings });
     saveSettings(defaultSettings);
   };
@@ -175,7 +176,7 @@ export function AppSettings() {
         </div>
 
         <div className="flex gap-2">
-          <Button 
+          <Button
             onClick={handleResetSettings}
             variant="outline"
             disabled={isSaving}
@@ -183,8 +184,8 @@ export function AppSettings() {
             <RotateCcw className="h-4 w-4 mr-2" />
             รีเซ็ต
           </Button>
-          <Button 
-            onClick={handleSaveSettings} 
+          <Button
+            onClick={handleSaveSettings}
             disabled={isSaving}
             className="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 disabled:opacity-50"
           >
@@ -397,7 +398,7 @@ export function AppSettings() {
                   <Input
                     id="storeName"
                     value={localSettings.storeName}
-                    onChange={(e) => setLocalSettings({...localSettings, storeName: e.target.value})}
+                    onChange={(e) => setLocalSettings({ ...localSettings, storeName: e.target.value })}
                   />
                 </div>
                 <div>
@@ -405,7 +406,7 @@ export function AppSettings() {
                   <Input
                     id="websiteName"
                     value={localSettings.websiteName}
-                    onChange={(e) => setLocalSettings({...localSettings, websiteName: e.target.value})}
+                    onChange={(e) => setLocalSettings({ ...localSettings, websiteName: e.target.value })}
                   />
                 </div>
               </div>
@@ -415,7 +416,7 @@ export function AppSettings() {
                 <Input
                   id="storeSlogan"
                   value={localSettings.storeSlogan || ""}
-                  onChange={(e) => setLocalSettings({...localSettings, storeSlogan: e.target.value})}
+                  onChange={(e) => setLocalSettings({ ...localSettings, storeSlogan: e.target.value })}
                   placeholder="เช่น เสื้อผ้าแฟชั่นมุสลิม"
                 />
               </div>
@@ -425,7 +426,7 @@ export function AppSettings() {
                 <Textarea
                   id="storeAddress"
                   value={localSettings.storeAddress || ""}
-                  onChange={(e) => setLocalSettings({...localSettings, storeAddress: e.target.value})}
+                  onChange={(e) => setLocalSettings({ ...localSettings, storeAddress: e.target.value })}
                   rows={3}
                 />
               </div>
@@ -436,7 +437,7 @@ export function AppSettings() {
                   <Input
                     id="storePhone"
                     value={localSettings.storePhone || ""}
-                    onChange={(e) => setLocalSettings({...localSettings, storePhone: e.target.value})}
+                    onChange={(e) => setLocalSettings({ ...localSettings, storePhone: e.target.value })}
                   />
                 </div>
                 <div>
@@ -445,7 +446,7 @@ export function AppSettings() {
                     id="storeEmail"
                     type="email"
                     value={localSettings.storeEmail || ""}
-                    onChange={(e) => setLocalSettings({...localSettings, storeEmail: e.target.value})}
+                    onChange={(e) => setLocalSettings({ ...localSettings, storeEmail: e.target.value })}
                   />
                 </div>
               </div>
@@ -471,13 +472,12 @@ export function AppSettings() {
                   {colorOptions.map((color) => (
                     <button
                       key={color.value}
-                      className={`w-12 h-12 rounded-lg border-2 ${
-                        localSettings.primaryColor === color.value 
-                          ? 'border-gray-900 dark:border-white' 
+                      className={`w-12 h-12 rounded-lg border-2 ${localSettings.primaryColor === color.value
+                          ? 'border-gray-900 dark:border-white'
                           : 'border-gray-200 dark:border-gray-700'
-                      }`}
+                        }`}
                       style={{ backgroundColor: color.value }}
-                      onClick={() => setLocalSettings({...localSettings, primaryColor: color.value})}
+                      onClick={() => setLocalSettings({ ...localSettings, primaryColor: color.value })}
                       title={color.name}
                     />
                   ))}
@@ -502,7 +502,7 @@ export function AppSettings() {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="currency">สกุลเงิน</Label>
-                  <Select value={localSettings.currency} onValueChange={(value) => setLocalSettings({...localSettings, currency: value})}>
+                  <Select value={localSettings.currency} onValueChange={(value) => setLocalSettings({ ...localSettings, currency: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -515,7 +515,7 @@ export function AppSettings() {
                 </div>
                 <div>
                   <Label htmlFor="dateFormat">รูปแบบวันที่</Label>
-                  <Select value={localSettings.dateFormat} onValueChange={(value) => setLocalSettings({...localSettings, dateFormat: value})}>
+                  <Select value={localSettings.dateFormat} onValueChange={(value) => setLocalSettings({ ...localSettings, dateFormat: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -532,9 +532,23 @@ export function AppSettings() {
                     id="defaultSalesTarget"
                     type="number"
                     value={localSettings.defaultSalesTarget}
-                    onChange={(e) => setLocalSettings({...localSettings, defaultSalesTarget: Number(e.target.value)})}
+                    onChange={(e) => setLocalSettings({ ...localSettings, defaultSalesTarget: Number(e.target.value) })}
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="monthlyTarget">เป้าหมายรายเดือน (บาท)</Label>
+                <Input
+                  id="monthlyTarget"
+                  type="number"
+                  value={localSettings.monthlyTarget || 200000}
+                  onChange={(e) => setLocalSettings({ ...localSettings, monthlyTarget: Number(e.target.value) })}
+                  placeholder="200,000"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  เป้าหมายรายรับสุทธิต่อเดือน (รายรับ - รายจ่าย)
+                </p>
               </div>
             </CardContent>
           </Card>

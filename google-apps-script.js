@@ -571,7 +571,7 @@ function getSettingsData(callback) {
       '',
       'THB',
       'DD/MM/YYYY',
-      15000,
+      200000,
       new Date().toISOString(),
       new Date().toISOString()
     ];
@@ -627,7 +627,7 @@ function saveSettingsData(settingsData, callback) {
     settingsData.storeEmail || '',
     settingsData.currency || 'THB',
     settingsData.dateFormat || 'DD/MM/YYYY',
-    settingsData.defaultSalesTarget || 15000,
+    settingsData.defaultSalesTarget || 200000,
     data.length > 1 ? data[settingsRow - 1][11] : now, // เก็บ createdAt เดิม
     now // updatedAt ใหม่
   ];

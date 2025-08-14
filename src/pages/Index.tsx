@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 import { TrendChart } from "@/components/dashboard/trend-chart";
 import { CategoryChart } from "@/components/dashboard/category-chart";
@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useSheetsData } from "@/hooks/use-sheets-data";
+import { useSettings } from "@/hooks/use-settings";
 import { Income, Expense, DashboardSummary, ChartData, CategoryData, ChannelData, FilterOptions, TopCategoryData } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 import { Plus, Search, TrendingUp, BarChart3, PieChart, Loader2, AlertCircle } from "lucide-react";
@@ -37,10 +38,19 @@ const Index = () => {
     refetchAll
   } = useSheetsData();
 
+  const { settings } = useSettings();
+
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterOptions>({});
-  const [salesTarget, setSalesTarget] = useState<number>(15000); // Default target
+  const [salesTarget, setSalesTarget] = useState<number>(settings.monthlyTarget || 200000);
+
+  // Update sales target when settings change
+  useEffect(() => {
+    if (settings.monthlyTarget) {
+      setSalesTarget(settings.monthlyTarget);
+    }
+  }, [settings.monthlyTarget]);
 
   // Filter data based on active filters
   const filteredIncomeData = useMemo(() => {

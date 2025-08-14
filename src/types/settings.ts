@@ -26,6 +26,7 @@ export interface AppSettings {
   currency: string;
   dateFormat: string;
   defaultSalesTarget: number;
+  monthlyTarget: number;
 
   createdAt: string;
   updatedAt: string;

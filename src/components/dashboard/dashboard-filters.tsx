@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -32,10 +31,6 @@ export function DashboardFilters({
   const [datePickerOpen, setDatePickerOpen] = useState({ from: false, to: false });
   const [isOpen, setIsOpen] = useState(false);
   const [isCustomDateMode, setIsCustomDateMode] = useState(false);
-
-  const updateFilter = (key: keyof FilterOptions, value: any) => {
-    onFiltersChange({ ...filters, [key]: value });
-  };
 
   const clearFilters = () => {
     onFiltersChange({});
@@ -238,253 +233,173 @@ export function DashboardFilters({
         <CollapsibleContent className="space-y-4">
           {/* Filters Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            {/* Date Range Filter */}
+            <Card className="p-4">
+              <Label className="text-sm font-medium mb-2 block">ช่วงวันที่</Label>
+              <Select value={getDateRangePreset(filters)} onValueChange={handleDateRangePreset}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="เลือกช่วงเวลา" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">ทั้งหมด</SelectItem>
+                  <SelectItem value="last7days">7 วันที่ผ่านมา</SelectItem>
+                  <SelectItem value="last30days">30 วันที่ผ่านมา</SelectItem>
+                  <SelectItem value="lastMonth">เดือนที่แล้ว</SelectItem>
+                  <SelectItem value="lastYear">ปีที่แล้ว</SelectItem>
+                  <SelectItem value="thisYear">ปีนี้</SelectItem>
+                  <SelectItem value="custom">กำหนดเอง</SelectItem>
+                </SelectContent>
+              </Select>
 
-        {/* Date Range Filter */}
-        <Card className="p-4">
-          <Label className="text-sm font-medium mb-2 block">ช่วงวันที่</Label>
-          <Select value={getDateRangePreset(filters)} onValueChange={handleDateRangePreset}>
-            <SelectTrigger className="h-9">
-              <SelectValue placeholder="เลือกช่วงเวลา" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">ทั้งหมด</SelectItem>
-              <SelectItem value="last7days">7 วันที่ผ่านมา</SelectItem>
-              <SelectItem value="last30days">30 วันที่ผ่านมา</SelectItem>
-              <SelectItem value="lastMonth">เดือนที่แล้ว</SelectItem>
-              <SelectItem value="lastYear">ปีที่แล้ว</SelectItem>
-              <SelectItem value="thisYear">ปีนี้</SelectItem>
-              <SelectItem value="custom">กำหนดเอง</SelectItem>
-            </SelectContent>
-          </Select>
+              {/* Custom Date Range */}
+              {(getDateRangePreset(filters) === 'custom' || isCustomDateMode) && (
+                <div className="mt-2 space-y-2">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">จากวันที่</Label>
+                    <Popover open={datePickerOpen.from} onOpenChange={(open) => setDatePickerOpen(prev => ({ ...prev, from: open }))}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal">
+                          <CalendarIcon className="mr-2 h-3 w-3" />
+                          <span className="text-xs">
+                            {filters.dateFrom ? formatDate(filters.dateFrom) : "เลือกวันที่"}
+                          </span>
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={filters.dateFrom ? new Date(filters.dateFrom) : undefined}
+                          onSelect={(date) => handleDateSelect(date, 'from')}
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">ถึงวันที่</Label>
+                    <Popover open={datePickerOpen.to} onOpenChange={(open) => setDatePickerOpen(prev => ({ ...prev, to: open }))}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal">
+                          <CalendarIcon className="mr-2 h-3 w-3" />
+                          <span className="text-xs">
+                            {filters.dateTo ? formatDate(filters.dateTo) : "เลือกวันที่"}
+                          </span>
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={filters.dateTo ? new Date(filters.dateTo) : undefined}
+                          onSelect={(date) => handleDateSelect(date, 'to')}
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              )}
+            </Card>
 
-          {/* Custom Date Range */}
-          {(getDateRangePreset(filters) === 'custom' || isCustomDateMode) && (
-            <div className="mt-2 space-y-2">
-              <div>
-                <Label className="text-xs text-muted-foreground">จากวันที่</Label>
-                <Popover open={datePickerOpen.from} onOpenChange={(open) => setDatePickerOpen(prev => ({ ...prev, from: open }))}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal">
-                      <CalendarIcon className="mr-2 h-3 w-3" />
-                      <span className="text-xs">
-                        {filters.dateFrom ? formatDate(filters.dateFrom) : "เลือกวันที่"}
-                      </span>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={filters.dateFrom ? new Date(filters.dateFrom) : undefined}
-                      onSelect={(date) => handleDateSelect(date, 'from')}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
+            {/* Channel Filter */}
+            <Card className="p-4">
+              <Label className="text-sm font-medium mb-2 block">ช่องทางขาย</Label>
+              <Select
+                value={filters.channels?.[0] || "all"}
+                onValueChange={(value) => onFiltersChange({
+                  ...filters,
+                  channels: value === "all" ? [] : [value as any]
+                })}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="เลือกช่องทาง" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">ทั้งหมด</SelectItem>
+                  <SelectItem value="store">หน้าร้าน</SelectItem>
+                  <SelectItem value="online">ออนไลน์</SelectItem>
+                </SelectContent>
+              </Select>
+            </Card>
+
+            {/* Branch/Platform Filter */}
+            <Card className="p-4">
+              <Label className="text-sm font-medium mb-2 block">สาขา/แพลตฟอร์ม</Label>
+              <Select
+                value={filters.branches?.[0] || "all"}
+                onValueChange={(value) => onFiltersChange({
+                  ...filters,
+                  branches: value === "all" ? [] : [value]
+                })}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="เลือกสาขา/แพลตฟอร์ม" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">ทั้งหมด</SelectItem>
+                  {availableBranches.filter(branch => branch && branch.trim() !== '').map(branch => (
+                    <SelectItem key={branch} value={branch}>{branch}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Card>
+
+            {/* Product Categories Filter */}
+            <Card className="p-4">
+              <Label className="text-sm font-medium mb-2 block">หมวดหมู่สินค้า</Label>
+              <Select
+                value={filters.productCategories?.[0] || "all"}
+                onValueChange={(value) => onFiltersChange({
+                  ...filters,
+                  productCategories: value === "all" ? [] : [value]
+                })}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="เลือกหมวดหมู่สินค้า" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">ทั้งหมด</SelectItem>
+                  {availableProductCategories.filter(category => category && category.trim() !== '').map(category => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Card>
+
+            {/* Expense Categories Filter */}
+            <Card className="p-4">
+              <Label className="text-sm font-medium mb-2 block">หมวดหมู่จ่าย</Label>
+              <Select
+                value={filters.expenseCategories?.[0] || "all"}
+                onValueChange={(value) => onFiltersChange({
+                  ...filters,
+                  expenseCategories: value === "all" ? [] : [value]
+                })}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="เลือกหมวดหมู่จ่าย" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">ทั้งหมด</SelectItem>
+                  {availableExpenseCategories.filter(category => category && category.trim() !== '').map(category => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Card>
+
+            {/* Search Filter */}
+            <Card className="p-4">
+              <Label className="text-sm font-medium mb-2 block">ค้นหา</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="ค้นหาชื่อสินค้า หรือหมายเหตุ..."
+                  value={filters.q || ""}
+                  onChange={(e) => onFiltersChange({ ...filters, q: e.target.value })}
+                  className="h-9 pl-8"
+                />
               </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">ถึงวันที่</Label>
-                <Popover open={datePickerOpen.to} onOpenChange={(open) => setDatePickerOpen(prev => ({ ...prev, to: open }))}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal">
-                      <CalendarIcon className="mr-2 h-3 w-3" />
-                      <span className="text-xs">
-                        {filters.dateTo ? formatDate(filters.dateTo) : "เลือกวันที่"}
-                      </span>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={filters.dateTo ? new Date(filters.dateTo) : undefined}
-                      onSelect={(date) => handleDateSelect(date, 'to')}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-          )}
-        </Card>
-
-        {/* Channel Filter */}
-        <Card className="p-4">
-          <Label className="text-sm font-medium mb-2 block">ช่องทางขาย</Label>
-          <Select
-            value={filters.channels?.[0] || "all"}
-            onValueChange={(value) => onFiltersChange({
-              ...filters,
-              channels: value === "all" ? [] : [value]
-            })}
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue placeholder="เลือกช่องทาง" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">ทั้งหมด</SelectItem>
-              <SelectItem value="store">หน้าร้าน</SelectItem>
-              <SelectItem value="online">ออนไลน์</SelectItem>
-            </SelectContent>
-          </Select>
-        </Card>
-
-        {/* Branch/Platform Filter */}
-        <Card className="p-4">
-          <Label className="text-sm font-medium mb-2 block">สาขา/แพลตฟอร์ม</Label>
-          <Select
-            value={filters.branches?.[0] || "all"}
-            onValueChange={(value) => onFiltersChange({
-              ...filters,
-              branches: value === "all" ? [] : [value]
-            })}
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue placeholder="เลือกสาขา/แพลตฟอร์ม" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">ทั้งหมด</SelectItem>
-              {availableBranches.filter(branch => branch && branch.trim() !== '').map(branch => (
-                <SelectItem key={branch} value={branch}>{branch}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Card>
-
-        {/* Product Categories Filter */}
-        <Card className="p-4">
-          <Label className="text-sm font-medium mb-2 block">หมวดหมู่สินค้า</Label>
-          <Select
-            value={filters.productCategories?.[0] || "all"}
-            onValueChange={(value) => onFiltersChange({
-              ...filters,
-              productCategories: value === "all" ? [] : [value]
-            })}
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue placeholder="เลือกหมวดหมู่สินค้า" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">ทั้งหมด</SelectItem>
-              {availableProductCategories.filter(category => category && category.trim() !== '').map(category => (
-                <SelectItem key={category} value={category}>{category}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Card>
-
-        {/* Expense Categories Filter */}
-        <Card className="p-4">
-          <Label className="text-sm font-medium mb-2 block">หมวดหมู่จ่าย</Label>
-          <Select
-            value={filters.expenseCategories?.[0] || "all"}
-            onValueChange={(value) => onFiltersChange({
-              ...filters,
-              expenseCategories: value === "all" ? [] : [value]
-            })}
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue placeholder="เลือกหมวดหมู่จ่าย" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">ทั้งหมด</SelectItem>
-              {availableExpenseCategories.filter(category => category && category.trim() !== '').map(category => (
-                <SelectItem key={category} value={category}>{category}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Card>
-
-        {/* Search Filter */}
-        <Card className="p-4">
-          <Label className="text-sm font-medium mb-2 block">ค้นหา</Label>
-          <div className="relative">
-            <Search className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="ค้นหาชื่อสินค้า หรือหมายเหตุ..."
-              value={filters.q || ""}
-              onChange={(e) => onFiltersChange({ ...filters, q: e.target.value })}
-              className="h-9 pl-8"
-            />
-          </div>
-        </Card>
-
-      </div>
-
-      {/* Active Filters Summary */}
-      {hasActiveFilters && (
-        <div className="flex flex-wrap gap-2 pt-2 border-t">
-          <span className="text-sm text-muted-foreground">ตัวกรองที่ใช้งาน:</span>
-
-          {getDateRangeLabel(filters) && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
-              📅 {getDateRangeLabel(filters)}
-              <button
-                onClick={() => onFiltersChange({ ...filters, dateFrom: undefined, dateTo: undefined })}
-                className="hover:bg-primary/20 rounded-full p-0.5"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          )}
-
-          {filters.channels?.[0] && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
-              🏪 {filters.channels[0] === 'store' ? 'หน้าร้าน' : 'ออนไลน์'}
-              <button
-                onClick={() => onFiltersChange({ ...filters, channels: [] })}
-                className="hover:bg-primary/20 rounded-full p-0.5"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          )}
-
-          {filters.branches?.[0] && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
-              🏢 {filters.branches[0]}
-              <button
-                onClick={() => onFiltersChange({ ...filters, branches: [] })}
-                className="hover:bg-primary/20 rounded-full p-0.5"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          )}
-
-          {filters.productCategories?.[0] && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
-              📦 {filters.productCategories[0]}
-              <button
-                onClick={() => onFiltersChange({ ...filters, productCategories: [] })}
-                className="hover:bg-primary/20 rounded-full p-0.5"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          )}
-
-          {filters.expenseCategories?.[0] && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
-              💰 {filters.expenseCategories[0]}
-              <button
-                onClick={() => onFiltersChange({ ...filters, expenseCategories: [] })}
-                className="hover:bg-primary/20 rounded-full p-0.5"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          )}
-
-          {filters.q && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
-              🔍 "{filters.q}"
-              <button
-                onClick={() => onFiltersChange({ ...filters, q: undefined })}
-                className="hover:bg-primary/20 rounded-full p-0.5"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          )}
+            </Card>
           </div>
 
           {/* Active Filters Summary */}

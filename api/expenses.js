@@ -1,4 +1,5 @@
-import { createExpenseRecord } from '../src/lib/vercel-sheets.js';
+// For Vercel deployment, we need to use the sheets API directly
+import { google } from 'googleapis';
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -21,13 +22,50 @@ export default async function handler(req, res) {
         });
       }
 
+      // Set up Google Sheets API
+      const auth = new google.auth.GoogleAuth({
+        credentials: {
+          client_email: process.env.GOOGLE_CLIENT_EMAIL || process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+          private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n').replace(/"/g, ''),
+        },
+        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+      });
+
+      const sheets = google.sheets({ version: 'v4', auth });
+      const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID || process.env.GOOGLE_SHEETS_ID;
+
+      if (!spreadsheetId) {
+        return res.status(500).json({ error: 'Spreadsheet ID not configured' });
+      }
+
       // Create expense record
-      const result = await createExpenseRecord(expenseData);
+      const id = `expense_${Date.now()}`;
+      const now = new Date().toISOString();
+      
+      const values = [
+        id,
+        expenseData.date || new Date().toISOString().split('T')[0],
+        expenseData.channel || 'store',
+        expenseData.branch_or_platform || '',
+        expenseData.expense_item,
+        expenseData.expense_category || '',
+        expenseData.cost,
+        expenseData.note || '',
+        now,
+        now
+      ];
+
+      const response = await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: 'รายจ่าย!A:J',
+        valueInputOption: 'USER_ENTERED',
+        resource: { values: [values] },
+      });
       
       return res.status(200).json({ 
         success: true, 
         message: 'Expense record created successfully',
-        data: result 
+        data: { id, updatedRows: response.data.updates?.updatedRows || 1 }
       });
     } catch (error) {
       console.error('Error creating expense record:', error);

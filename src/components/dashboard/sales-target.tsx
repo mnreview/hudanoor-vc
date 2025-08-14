@@ -204,6 +204,12 @@ export function SalesTarget({ summary, onTargetUpdate, filters }: SalesTargetPro
                 <div className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   {formatCurrency(summary.totalIncome)}
                 </div>
+                {(filters.dateFrom || filters.dateTo || filters.channels?.length || filters.branches?.length || filters.productCategories?.length || filters.q) && (
+                  <div className="text-xs text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
+                    <span>⚠️</span>
+                    <span>ข้อมูลถูกกรองแล้ว</span>
+                  </div>
+                )}
               </div>
               
               <div className="bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-300">

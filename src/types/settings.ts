@@ -6,27 +6,27 @@ export interface AppSettings {
   storeLogo?: string;
   storeSlogan?: string;
   primaryColor: string;
-  
+
   // ข้อมูลติดต่อ
   storeAddress?: string;
   storePhone?: string;
   storeEmail?: string;
-  
+
   // การตั้งค่าฟิลด์ฟอร์ม
   incomeFormFields: FormFieldConfig[];
   expenseFormFields: FormFieldConfig[];
-  
+
   // ตัวเลือกสำหรับฟิลด์ต่างๆ
   channels: string[]; // ช่องทางขาย
   branches: string[]; // สาขา/แพลตฟอร์ม
   productCategories: string[]; // หมวดหมู่สินค้า
   expenseCategories: string[]; // หมวดหมู่รายจ่าย
-  
+
   // การตั้งค่าอื่นๆ
   currency: string;
   dateFormat: string;
   defaultSalesTarget: number;
-  
+
   createdAt: string;
   updatedAt: string;
 }

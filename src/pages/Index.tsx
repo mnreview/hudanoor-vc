@@ -45,8 +45,19 @@ const Index = () => {
   // Filter data based on active filters
   const filteredIncomeData = useMemo(() => {
     return incomeData.filter(item => {
-      if (filters.dateFrom && item.date < filters.dateFrom) return false;
-      if (filters.dateTo && item.date > filters.dateTo) return false;
+      // Date filtering - compare dates properly
+      if (filters.dateFrom) {
+        const itemDate = new Date(item.date);
+        const filterFromDate = new Date(filters.dateFrom);
+        if (itemDate < filterFromDate) return false;
+      }
+      if (filters.dateTo) {
+        const itemDate = new Date(item.date);
+        const filterToDate = new Date(filters.dateTo);
+        // Include the entire day by setting time to end of day
+        filterToDate.setHours(23, 59, 59, 999);
+        if (itemDate > filterToDate) return false;
+      }
       if (filters.channels?.length && !filters.channels.includes(item.channel)) return false;
       if (filters.branches?.length && !filters.branches.includes(item.branch_or_platform)) return false;
       if (filters.productCategories?.length && !filters.productCategories.includes(item.product_category)) return false;
@@ -58,8 +69,19 @@ const Index = () => {
 
   const filteredExpenseData = useMemo(() => {
     return expenseData.filter(item => {
-      if (filters.dateFrom && item.date < filters.dateFrom) return false;
-      if (filters.dateTo && item.date > filters.dateTo) return false;
+      // Date filtering - compare dates properly
+      if (filters.dateFrom) {
+        const itemDate = new Date(item.date);
+        const filterFromDate = new Date(filters.dateFrom);
+        if (itemDate < filterFromDate) return false;
+      }
+      if (filters.dateTo) {
+        const itemDate = new Date(item.date);
+        const filterToDate = new Date(filters.dateTo);
+        // Include the entire day by setting time to end of day
+        filterToDate.setHours(23, 59, 59, 999);
+        if (itemDate > filterToDate) return false;
+      }
       if (filters.channels?.length && !filters.channels.includes(item.channel)) return false;
       if (filters.branches?.length && !filters.branches.includes(item.branch_or_platform)) return false;
       if (filters.expenseCategories?.length && !filters.expenseCategories.includes(item.expense_category)) return false;
@@ -75,6 +97,15 @@ const Index = () => {
     const totalExpense = filteredExpenseData.reduce((sum, item) => sum + item.cost, 0);
     const totalQuantity = filteredIncomeData.reduce((sum, item) => sum + item.quantity, 0);
 
+    // Debug logging
+    console.log('Dashboard Summary Debug:', {
+      totalIncomeRecords: incomeData.length,
+      filteredIncomeRecords: filteredIncomeData.length,
+      totalIncome,
+      filters,
+      sampleFilteredData: filteredIncomeData.slice(0, 3)
+    });
+
     return {
       totalIncome,
       totalExpense,
@@ -88,7 +119,7 @@ const Index = () => {
         profitChange: 15.8
       }
     };
-  }, [filteredIncomeData, filteredExpenseData, salesTarget]);
+  }, [filteredIncomeData, filteredExpenseData, salesTarget, incomeData, filters]);
 
   // Generate available filter options
   const availableBranches = useMemo(() => {
@@ -384,6 +415,23 @@ const Index = () => {
             filters={filters}
           />
         </div>
+
+        {/* Data Filter Warning */}
+        {(filters.dateFrom || filters.dateTo || filters.channels?.length || filters.branches?.length || filters.productCategories?.length || filters.expenseCategories?.length || filters.q) && (
+          <div className="mb-6">
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                <span className="text-lg">⚠️</span>
+                <div>
+                  <p className="font-medium">ข้อมูลที่แสดงถูกกรองแล้ว</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    ยอดขายรวมและสถิติต่างๆ แสดงเฉพาะข้อมูลที่ตรงกับตัวกรองที่เลือก หากต้องการดูข้อมูลทั้งหมด กรุณาล้างตัวกรอง
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Sales Target */}
         <div className="mb-6">

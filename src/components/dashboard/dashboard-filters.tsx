@@ -31,6 +31,7 @@ export function DashboardFilters({
 }: DashboardFiltersProps) {
   const [datePickerOpen, setDatePickerOpen] = useState({ from: false, to: false });
   const [isOpen, setIsOpen] = useState(false);
+  const [isCustomDateMode, setIsCustomDateMode] = useState(false);
 
   const updateFilter = (key: keyof FilterOptions, value: any) => {
     onFiltersChange({ ...filters, [key]: value });
@@ -94,10 +95,12 @@ export function DashboardFilters({
 
     switch (preset) {
       case 'all':
+        setIsCustomDateMode(false);
         onFiltersChange({ ...filters, dateFrom: undefined, dateTo: undefined });
         break;
 
       case 'last7days':
+        setIsCustomDateMode(false);
         const last7Days = new Date(today);
         last7Days.setDate(last7Days.getDate() - 7);
         onFiltersChange({
@@ -108,6 +111,7 @@ export function DashboardFilters({
         break;
 
       case 'last30days':
+        setIsCustomDateMode(false);
         const last30Days = new Date(today);
         last30Days.setDate(last30Days.getDate() - 30);
         onFiltersChange({
@@ -118,6 +122,7 @@ export function DashboardFilters({
         break;
 
       case 'lastMonth':
+        setIsCustomDateMode(false);
         const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
         onFiltersChange({
@@ -128,6 +133,7 @@ export function DashboardFilters({
         break;
 
       case 'lastYear':
+        setIsCustomDateMode(false);
         const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
         const lastYearEnd = new Date(now.getFullYear() - 1, 11, 31);
         onFiltersChange({
@@ -138,6 +144,7 @@ export function DashboardFilters({
         break;
 
       case 'thisYear':
+        setIsCustomDateMode(false);
         const thisYearStart = new Date(now.getFullYear(), 0, 1);
         const thisYearEnd = new Date(now.getFullYear(), 11, 31);
         onFiltersChange({
@@ -148,7 +155,8 @@ export function DashboardFilters({
         break;
 
       case 'custom':
-        // Keep current dates or clear them
+        // Set custom mode to show date pickers
+        setIsCustomDateMode(true);
         break;
 
       default:
@@ -237,7 +245,7 @@ export function DashboardFilters({
           </Select>
 
           {/* Custom Date Range */}
-          {getDateRangePreset(filters) === 'custom' && (
+          {(getDateRangePreset(filters) === 'custom' || isCustomDateMode) && (
             <div className="mt-2 space-y-2">
               <div>
                 <Label className="text-xs text-muted-foreground">จากวันที่</Label>

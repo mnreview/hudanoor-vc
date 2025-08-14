@@ -19,6 +19,7 @@ import { format, isToday, isTomorrow, isPast, differenceInDays } from "date-fns"
 import { th } from "date-fns/locale";
 import { toast } from "@/hooks/use-toast";
 import { useTasks } from "@/hooks/use-tasks";
+import { useSettings } from "@/hooks/use-settings";
 import { TaskReminder as TaskReminderType } from "@/types/task";
 import { testConnection } from "@/lib/task-api";
 
@@ -33,6 +34,8 @@ export function TaskReminder() {
     isUpdatingTask,
     isDeletingTask
   } = useTasks();
+  
+  const { settings } = useSettings();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newTask, setNewTask] = useState({
@@ -312,43 +315,64 @@ export function TaskReminder() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="store">หน้าร้าน</SelectItem>
-                    <SelectItem value="online">ออนไลน์</SelectItem>
+                    {(settings.channels || ['หน้าร้าน', 'ออนไลน์']).map(channel => (
+                      <SelectItem key={channel} value={channel === 'หน้าร้าน' ? 'store' : 'online'}>
+                        {channel}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
                 <Label htmlFor="branchOrPlatform">สาขา/แพลตฟอร์ม *</Label>
-                <Input
-                  id="branchOrPlatform"
-                  value={newTask.branchOrPlatform}
-                  onChange={(e) => setNewTask(prev => ({ ...prev, branchOrPlatform: e.target.value }))}
-                  placeholder={newTask.channel === 'online' ? 'เช่น Shopee, Lazada, Facebook' : 'เช่น สาขาหลัก, สาขา 2'}
-                />
+                <Select value={newTask.branchOrPlatform} onValueChange={(value) => setNewTask(prev => ({ ...prev, branchOrPlatform: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกสาขา/แพลตฟอร์ม" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(settings.branches || ['สาขาหลัก']).map(branch => (
+                      <SelectItem key={branch} value={branch}>
+                        {branch}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {newTask.type === 'income' && (
                 <div>
                   <Label htmlFor="productCategory">หมวดหมู่สินค้า *</Label>
-                  <Input
-                    id="productCategory"
-                    value={newTask.productCategory}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, productCategory: e.target.value }))}
-                    placeholder="เช่น เสื้อผ้า, อาหาร, เครื่องใช้"
-                  />
+                  <Select value={newTask.productCategory} onValueChange={(value) => setNewTask(prev => ({ ...prev, productCategory: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="เลือกหมวดหมู่สินค้า" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(settings.productCategories || ['เสื้อผ้า', 'อุปกรณ์', 'อื่นๆ']).map(category => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 
               {newTask.type === 'expense' && (
                 <div>
                   <Label htmlFor="expenseCategory">หมวดหมู่รายจ่าย *</Label>
-                  <Input
-                    id="expenseCategory"
-                    value={newTask.expenseCategory}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, expenseCategory: e.target.value }))}
-                    placeholder="เช่น ค่าเช่า, ค่าไฟ, วัตถุดิบ"
-                  />
+                  <Select value={newTask.expenseCategory} onValueChange={(value) => setNewTask(prev => ({ ...prev, expenseCategory: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="เลือกหมวดหมู่รายจ่าย" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(settings.expenseCategories || ['ค่าเช่า', 'ค่าไฟ', 'วัตถุดิบ', 'อื่นๆ']).map(category => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 

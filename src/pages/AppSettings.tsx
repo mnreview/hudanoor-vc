@@ -15,7 +15,11 @@ import {
   Save,
   Check,
   RotateCcw,
-  Loader2
+  Loader2,
+  List,
+  Plus,
+  X,
+  Tag
 } from "lucide-react";
 
 const colorOptions = [
@@ -31,6 +35,12 @@ const colorOptions = [
 export function AppSettings() {
   const { settings, isLoading, saveSettings, isSaving } = useSettings();
   const [localSettings, setLocalSettings] = useState(settings);
+  
+  // State สำหรับการเพิ่มตัวเลือกใหม่
+  const [newChannel, setNewChannel] = useState('');
+  const [newBranch, setNewBranch] = useState('');
+  const [newProductCategory, setNewProductCategory] = useState('');
+  const [newExpenseCategory, setNewExpenseCategory] = useState('');
 
   // อัพเดต localSettings เมื่อ settings จาก server เปลี่ยน
   React.useEffect(() => {
@@ -39,6 +49,75 @@ export function AppSettings() {
 
   const handleSaveSettings = () => {
     saveSettings(localSettings);
+  };
+
+  // ฟังก์ชันสำหรับจัดการตัวเลือก
+  const addChannel = () => {
+    if (newChannel.trim() && !localSettings.channels?.includes(newChannel.trim())) {
+      setLocalSettings({
+        ...localSettings,
+        channels: [...(localSettings.channels || []), newChannel.trim()]
+      });
+      setNewChannel('');
+    }
+  };
+
+  const removeChannel = (channel: string) => {
+    setLocalSettings({
+      ...localSettings,
+      channels: localSettings.channels?.filter(c => c !== channel) || []
+    });
+  };
+
+  const addBranch = () => {
+    if (newBranch.trim() && !localSettings.branches?.includes(newBranch.trim())) {
+      setLocalSettings({
+        ...localSettings,
+        branches: [...(localSettings.branches || []), newBranch.trim()]
+      });
+      setNewBranch('');
+    }
+  };
+
+  const removeBranch = (branch: string) => {
+    setLocalSettings({
+      ...localSettings,
+      branches: localSettings.branches?.filter(b => b !== branch) || []
+    });
+  };
+
+  const addProductCategory = () => {
+    if (newProductCategory.trim() && !localSettings.productCategories?.includes(newProductCategory.trim())) {
+      setLocalSettings({
+        ...localSettings,
+        productCategories: [...(localSettings.productCategories || []), newProductCategory.trim()]
+      });
+      setNewProductCategory('');
+    }
+  };
+
+  const removeProductCategory = (category: string) => {
+    setLocalSettings({
+      ...localSettings,
+      productCategories: localSettings.productCategories?.filter(c => c !== category) || []
+    });
+  };
+
+  const addExpenseCategory = () => {
+    if (newExpenseCategory.trim() && !localSettings.expenseCategories?.includes(newExpenseCategory.trim())) {
+      setLocalSettings({
+        ...localSettings,
+        expenseCategories: [...(localSettings.expenseCategories || []), newExpenseCategory.trim()]
+      });
+      setNewExpenseCategory('');
+    }
+  };
+
+  const removeExpenseCategory = (category: string) => {
+    setLocalSettings({
+      ...localSettings,
+      expenseCategories: localSettings.expenseCategories?.filter(c => c !== category) || []
+    });
   };
 
   const handleResetSettings = () => {
@@ -53,7 +132,11 @@ export function AppSettings() {
       storeEmail: "",
       currency: "THB",
       dateFormat: "DD/MM/YYYY",
-      defaultSalesTarget: 15000
+      defaultSalesTarget: 15000,
+      channels: ["หน้าร้าน", "ออนไลน์"],
+      branches: ["สาขาหลัก"],
+      productCategories: ["เสื้อผ้า", "อุปกรณ์", "อื่นๆ"],
+      expenseCategories: ["ค่าเช่า", "ค่าไฟ", "วัตถุดิบ", "อื่นๆ"]
     };
     
     setLocalSettings({ ...localSettings, ...defaultSettings });
@@ -121,11 +204,180 @@ export function AppSettings() {
       </div>
 
       <Tabs defaultValue="store" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="store">ข้อมูลร้าน</TabsTrigger>
+          <TabsTrigger value="options">ตัวเลือก</TabsTrigger>
           <TabsTrigger value="appearance">รูปลักษณ์</TabsTrigger>
           <TabsTrigger value="system">ระบบ</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="options" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* ช่องทางขาย */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Store className="h-5 w-5" />
+                  ช่องทางขาย
+                </CardTitle>
+                <CardDescription>
+                  จัดการตัวเลือกช่องทางขาย
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="เพิ่มช่องทางใหม่"
+                    value={newChannel}
+                    onChange={(e) => setNewChannel(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addChannel()}
+                  />
+                  <Button onClick={addChannel} size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {localSettings.channels?.map((channel, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
+                      <span>{channel}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeChannel(channel)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* สาขา/แพลตฟอร์ม */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <List className="h-5 w-5" />
+                  สาขา/แพลตฟอร์ม
+                </CardTitle>
+                <CardDescription>
+                  จัดการตัวเลือกสาขาและแพลตฟอร์ม
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="เพิ่มสาขา/แพลตฟอร์มใหม่"
+                    value={newBranch}
+                    onChange={(e) => setNewBranch(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addBranch()}
+                  />
+                  <Button onClick={addBranch} size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {localSettings.branches?.map((branch, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
+                      <span>{branch}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeBranch(branch)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* หมวดหมู่สินค้า */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Tag className="h-5 w-5" />
+                  หมวดหมู่สินค้า
+                </CardTitle>
+                <CardDescription>
+                  จัดการหมวดหมู่สินค้าสำหรับรายรับ
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="เพิ่มหมวดหมู่สินค้าใหม่"
+                    value={newProductCategory}
+                    onChange={(e) => setNewProductCategory(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addProductCategory()}
+                  />
+                  <Button onClick={addProductCategory} size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {localSettings.productCategories?.map((category, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
+                      <span>{category}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeProductCategory(category)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* หมวดหมู่รายจ่าย */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  หมวดหมู่รายจ่าย
+                </CardTitle>
+                <CardDescription>
+                  จัดการหมวดหมู่รายจ่าย
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="เพิ่มหมวดหมู่รายจ่ายใหม่"
+                    value={newExpenseCategory}
+                    onChange={(e) => setNewExpenseCategory(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addExpenseCategory()}
+                  />
+                  <Button onClick={addExpenseCategory} size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {localSettings.expenseCategories?.map((category, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
+                      <span>{category}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeExpenseCategory(category)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         <TabsContent value="store" className="space-y-4">
           <Card>

@@ -26,6 +26,24 @@ const parseSettingsData = (rows: any[][]): Record<string, any> => {
   return settings;
 };
 
+// Default settings
+const defaultSettings = {
+  storeName: "HUDANOOR",
+  websiteName: "ระบบบันทึกรายรับ-รายจ่าย",
+  storeSlogan: "เสื้อผ้าแฟชั่นมุสลิม",
+  primaryColor: "#e11d48",
+  storeAddress: "",
+  storePhone: "",
+  storeEmail: "",
+  currency: "THB",
+  dateFormat: "DD/MM/YYYY",
+  defaultSalesTarget: 15000,
+  channels: ["หน้าร้าน", "ออนไลน์"],
+  branches: ["สาขาหลัก"],
+  productCategories: ["เสื้อผ้า", "อุปกรณ์", "อื่นๆ"],
+  expenseCategories: ["ค่าเช่า", "ค่าไฟ", "วัตถุดิบ", "อื่นๆ"]
+};
+
 // Read settings data from Google Sheets via Vercel API
 export const getSettingsData = async (): Promise<Record<string, any>> => {
   try {
@@ -37,10 +55,14 @@ export const getSettingsData = async (): Promise<Record<string, any>> => {
     }
     
     const data = await response.json();
-    return parseSettingsData(data.data || []);
+    const settings = parseSettingsData(data.data || []);
+    
+    // Merge with default settings
+    return { ...defaultSettings, ...settings };
   } catch (error) {
     console.error('Error fetching settings data:', error);
-    throw error;
+    // Return default settings if there's an error
+    return defaultSettings;
   }
 };
 

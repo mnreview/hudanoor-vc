@@ -16,6 +16,12 @@ export interface AppSettings {
   incomeFormFields: FormFieldConfig[];
   expenseFormFields: FormFieldConfig[];
   
+  // ตัวเลือกสำหรับฟิลด์ต่างๆ
+  channels: string[]; // ช่องทางขาย
+  branches: string[]; // สาขา/แพลตฟอร์ม
+  productCategories: string[]; // หมวดหมู่สินค้า
+  expenseCategories: string[]; // หมวดหมู่รายจ่าย
+  
   // การตั้งค่าอื่นๆ
   currency: string;
   dateFormat: string;

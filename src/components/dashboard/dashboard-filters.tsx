@@ -2,17 +2,17 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { FilterOptions } from "@/types";
 import { formatDate } from "@/lib/utils";
-import { CalendarIcon, Filter, X, Search } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CalendarIcon, Filter, X, Search, ChevronDown, ChevronUp } from "lucide-react";
 
 interface DashboardFiltersProps {
   filters: FilterOptions;
@@ -211,20 +211,33 @@ export function DashboardFilters({
   };
 
   return (
-    <div className="mb-6 space-y-4">
-      {/* Header with Clear All Button */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">ตัวกรองข้อมูล</h3>
-        {hasActiveFilters && (
-          <Button variant="outline" size="sm" onClick={clearFilters}>
-            <X className="h-4 w-4 mr-1" />
-            ล้างตัวกรองทั้งหมด
-          </Button>
-        )}
-      </div>
+    <div className="mb-6">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <div className="flex items-center justify-between mb-4">
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              <span>ตัวกรองข้อมูล</span>
+              {hasActiveFilters && (
+                <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
+                  {Object.keys(filters).length}
+                </span>
+              )}
+              {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+          </CollapsibleTrigger>
+          
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
+              <X className="h-4 w-4 mr-1" />
+              ล้างทั้งหมด
+            </Button>
+          )}
+        </div>
 
-      {/* Filters Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <CollapsibleContent className="space-y-4">
+          {/* Filters Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
 
         {/* Date Range Filter */}
         <Card className="p-4">
@@ -472,8 +485,88 @@ export function DashboardFilters({
               </button>
             </span>
           )}
-        </div>
-      )}
+          </div>
+
+          {/* Active Filters Summary */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap gap-2 pt-4 border-t">
+              <span className="text-sm text-muted-foreground">ตัวกรองที่ใช้งาน:</span>
+
+              {getDateRangeLabel(filters) && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
+                  📅 {getDateRangeLabel(filters)}
+                  <button
+                    onClick={() => onFiltersChange({ ...filters, dateFrom: undefined, dateTo: undefined })}
+                    className="hover:bg-primary/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+
+              {filters.channels?.[0] && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
+                  🏪 {filters.channels[0] === 'store' ? 'หน้าร้าน' : 'ออนไลน์'}
+                  <button
+                    onClick={() => onFiltersChange({ ...filters, channels: [] })}
+                    className="hover:bg-primary/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+
+              {filters.branches?.[0] && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
+                  🏢 {filters.branches[0]}
+                  <button
+                    onClick={() => onFiltersChange({ ...filters, branches: [] })}
+                    className="hover:bg-primary/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+
+              {filters.productCategories?.[0] && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
+                  📦 {filters.productCategories[0]}
+                  <button
+                    onClick={() => onFiltersChange({ ...filters, productCategories: [] })}
+                    className="hover:bg-primary/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+
+              {filters.expenseCategories?.[0] && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
+                  💰 {filters.expenseCategories[0]}
+                  <button
+                    onClick={() => onFiltersChange({ ...filters, expenseCategories: [] })}
+                    className="hover:bg-primary/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+
+              {filters.q && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
+                  🔍 "{filters.q}"
+                  <button
+                    onClick={() => onFiltersChange({ ...filters, q: undefined })}
+                    className="hover:bg-primary/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }

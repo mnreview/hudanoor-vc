@@ -1,5 +1,43 @@
 [
     {
+        "id": "log_1755151800000",
+        "version": "1.5.2",
+        "type": "improvement",
+        "title": "ปรับปรุงการแสดงผลกราฟแนวโน้มรายเดือนให้รองรับมือถือ",
+        "description": "ปรับปรุงการแสดงผลของการ์ดสรุปข้อมูลในกราฟแนวโน้มรายเดือนให้เหมาะสมกับหน้าจอมือถือมากขึ้น โดยลดขนาด padding และปรับขนาดตัวอักษรให้แสดงผลได้ดีในทุกขนาดหน้าจอ",
+        "changes": [
+            "ปรับ grid layout จาก md:grid-cols-4 เป็น lg:grid-cols-4 เพื่อรองรับหน้าจอขนาดกลาง",
+            "ลด padding ของการ์ดจาก p-4 เป็น p-3 และ gap จาก gap-4 เป็น gap-3",
+            "ปรับขนาดตัวอักษรให้ responsive: text-xs sm:text-sm สำหรับ label",
+            "ปรับขนาดจุดสีให้ responsive: w-2 h-2 sm:w-3 sm:h-3",
+            "ปรับขนาดตัวเลขหลักให้ responsive: text-lg sm:text-xl lg:text-2xl",
+            "เพิ่ม leading-tight เพื่อลดระยะห่างบรรทัด",
+            "ซ่อนข้อความคำแนะนำในหน้าจอเล็ก: hidden sm:block",
+            "ปรับข้อความให้สั้นลง: 'คลิกซ่อน'/'คลิกแสดง' แทน 'คลิกเพื่อซ่อน'/'คลิกเพื่อแสดง'"
+        ],
+        "technical_details": "ปรับปรุง CSS classes ใน monthly-breakdown-chart.tsx สำหรับ responsive design และ mobile optimization",
+        "impact": "ผู้ใช้มือถือสามารถดูและใช้งานกราฟแนวโน้มรายเดือนได้สะดวกมากขึ้น การแสดงผลเหมาะสมกับหน้าจอขนาดเล็ก",
+        "date": "2025-08-14",
+        "time": "13:30:00"
+    },
+    {
+        "id": "log_1755151750000",
+        "version": "1.5.1",
+        "type": "improvement",
+        "title": "เตรียมเพิ่มฟีเจอร์ Collapsible ในตัวกรองข้อมูล Dashboard",
+        "description": "ทำความสะอาดโค้ดและเตรียมพื้นฐานสำหรับการเพิ่มฟีเจอร์ Collapsible ในส่วนตัวกรองข้อมูลของ Dashboard ทำให้ผู้ใช้สามารถซ่อน/แสดงตัวกรองได้ตามต้องการ เพื่อประหยัดพื้นที่หน้าจอ",
+        "changes": [
+            "ลบ import ที่ไม่ได้ใช้งาน: CardContent, CardHeader, CardTitle, cn utility",
+            "เพิ่ม import สำหรับ Collapsible components: Collapsible, CollapsibleContent, CollapsibleTrigger",
+            "เพิ่มไอคอน ChevronDown และ ChevronUp สำหรับปุ่มแสดง/ซ่อน",
+            "เตรียมพื้นฐานสำหรับฟีเจอร์ Collapsible filters"
+        ],
+        "technical_details": "ปรับปรุง imports ใน src/components/dashboard/dashboard-filters.tsx โดยลบ unused imports และเพิ่ม Collapsible components พร้อม chevron icons",
+        "impact": "เตรียมพื้นฐานสำหรับการปรับปรุง UX ของตัวกรองข้อมูล ผู้ใช้จะสามารถซ่อน/แสดงตัวกรองได้ในอนาคต ทำให้การใช้งานมีความยืดหยุ่นมากขึ้น",
+        "date": "2025-08-14",
+        "time": "13:29:10"
+    },
+    {
         "id": "log_1755151700000",
         "version": "1.5.0",
         "type": "improvement",

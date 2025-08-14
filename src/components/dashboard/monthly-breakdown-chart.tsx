@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -27,12 +27,23 @@ interface MonthlyData {
 
 export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: MonthlyBreakdownChartProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const [visibleLines, setVisibleLines] = useState({
     income: true,
     expense: true,
     profit: true,
     quantity: true
   });
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Filter data based on active filters
   const filteredIncomeData = incomeData.filter(item => {
@@ -162,106 +173,119 @@ export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: Mont
       {isExpanded && (
         <CardContent>
           {/* Summary Stats - Clickable Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
             <div
-              className={`cursor-pointer transition-all duration-200 rounded-lg p-4 border-2 ${visibleLines.income
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-3 border-2 ${visibleLines.income
                 ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-700 shadow-md'
                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-700'
                 }`}
               onClick={() => toggleLine('income')}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm text-muted-foreground">ยอดขายรวม</div>
-                <div className={`w-3 h-3 rounded-full ${visibleLines.income ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-xs sm:text-sm text-muted-foreground">ยอดขาย</div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${visibleLines.income ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
               </div>
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600 dark:text-blue-400 leading-tight">
                 {formatCurrency(monthlyData.reduce((sum, item) => sum + item.income, 0))}
               </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {visibleLines.income ? 'คลิกเพื่อซ่อน' : 'คลิกเพื่อแสดง'}
+              <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
+                {visibleLines.income ? 'คลิกซ่อน' : 'คลิกแสดง'}
               </div>
             </div>
 
             <div
-              className={`cursor-pointer transition-all duration-200 rounded-lg p-4 border-2 ${visibleLines.expense
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-3 border-2 ${visibleLines.expense
                 ? 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-700 shadow-md'
                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-red-200 dark:hover:border-red-700'
                 }`}
               onClick={() => toggleLine('expense')}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm text-muted-foreground">ค่าใช้จ่ายรวม</div>
-                <div className={`w-3 h-3 rounded-full ${visibleLines.expense ? 'bg-red-500' : 'bg-gray-300'}`}></div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-xs sm:text-sm text-muted-foreground">ค่าใช้จ่าย</div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${visibleLines.expense ? 'bg-red-500' : 'bg-gray-300'}`}></div>
               </div>
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-red-600 dark:text-red-400 leading-tight">
                 {formatCurrency(monthlyData.reduce((sum, item) => sum + item.expense, 0))}
               </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {visibleLines.expense ? 'คลิกเพื่อซ่อน' : 'คลิกเพื่อแสดง'}
+              <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
+                {visibleLines.expense ? 'คลิกซ่อน' : 'คลิกแสดง'}
               </div>
             </div>
 
             <div
-              className={`cursor-pointer transition-all duration-200 rounded-lg p-4 border-2 ${visibleLines.profit
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-3 border-2 ${visibleLines.profit
                 ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-700 shadow-md'
                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-green-200 dark:hover:border-green-700'
                 }`}
               onClick={() => toggleLine('profit')}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm text-muted-foreground">กำไรรวม</div>
-                <div className={`w-3 h-3 rounded-full ${visibleLines.profit ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-xs sm:text-sm text-muted-foreground">กำไร</div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${visibleLines.profit ? 'bg-green-500' : 'bg-gray-300'}`}></div>
               </div>
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 dark:text-green-400 leading-tight">
                 {formatCurrency(monthlyData.reduce((sum, item) => sum + item.profit, 0))}
               </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {visibleLines.profit ? 'คลิกเพื่อซ่อน' : 'คลิกเพื่อแสดง'}
+              <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
+                {visibleLines.profit ? 'คลิกซ่อน' : 'คลิกแสดง'}
               </div>
             </div>
 
             <div
-              className={`cursor-pointer transition-all duration-200 rounded-lg p-4 border-2 ${visibleLines.quantity
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-3 border-2 ${visibleLines.quantity
                 ? 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-700 shadow-md'
                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-orange-200 dark:hover:border-orange-700'
                 }`}
               onClick={() => toggleLine('quantity')}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm text-muted-foreground">ชิ้นรวม</div>
-                <div className={`w-3 h-3 rounded-full ${visibleLines.quantity ? 'bg-orange-500' : 'bg-gray-300'}`}></div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-xs sm:text-sm text-muted-foreground">จำนวนชิ้น</div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${visibleLines.quantity ? 'bg-orange-500' : 'bg-gray-300'}`}></div>
               </div>
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                {monthlyData.reduce((sum, item) => sum + item.quantity, 0).toLocaleString()} ชิ้น
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-orange-600 dark:text-orange-400 leading-tight">
+                {monthlyData.reduce((sum, item) => sum + item.quantity, 0).toLocaleString()}
               </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {visibleLines.quantity ? 'คลิกเพื่อซ่อน' : 'คลิกเพื่อแสดง'}
+              <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
+                {visibleLines.quantity ? 'คลิกซ่อน' : 'คลิกแสดง'}
               </div>
             </div>
           </div>
 
           {/* Chart */}
-          <div className="h-80">
+          <div className="h-64 sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <LineChart 
+                data={monthlyData} 
+                margin={{ 
+                  top: 5, 
+                  right: isMobile ? 10 : 30, 
+                  left: isMobile ? 10 : 20, 
+                  bottom: isMobile ? 60 : 5 
+                }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
                 <XAxis
                   dataKey="monthLabel"
                   stroke="#6b7280"
-                  fontSize={12}
+                  fontSize={isMobile ? 10 : 12}
+                  angle={isMobile ? -45 : 0}
+                  textAnchor={isMobile ? 'end' : 'middle'}
+                  height={isMobile ? 60 : 30}
                 />
                 <YAxis
                   yAxisId="left"
                   stroke="#6b7280"
-                  fontSize={12}
+                  fontSize={isMobile ? 10 : 12}
                   tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
+                  width={isMobile ? 40 : 60}
                 />
                 <YAxis
                   yAxisId="right"
                   orientation="right"
                   stroke="#6b7280"
-                  fontSize={12}
+                  fontSize={isMobile ? 10 : 12}
                   tickFormatter={(value) => `${value}`}
+                  width={isMobile ? 30 : 40}
                 />
                 <Tooltip content={<CustomTooltip />} />
 

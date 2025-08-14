@@ -236,6 +236,55 @@ export const checkApiHealth = async (): Promise<boolean> => {
   }
 };
 
+// Create income record from Task Reminder format
+export const createIncomeRecord = async (incomeData: {
+  date: string;
+  product_name: string;
+  product_category?: string;
+  price: number;
+  quantity?: number;
+  total_amount?: number;
+  channel?: string;
+  branch_or_platform?: string;
+  note?: string;
+}): Promise<void> => {
+  const income = {
+    date: incomeData.date,
+    channel: incomeData.channel || 'store',
+    branch_or_platform: incomeData.branch_or_platform || '',
+    product_name: incomeData.product_name,
+    product_category: incomeData.product_category || '',
+    quantity: incomeData.quantity || 1,
+    amount: incomeData.total_amount || incomeData.price,
+    note: incomeData.note || ''
+  };
+
+  return addIncomeRecord(income);
+};
+
+// Create expense record from Task Reminder format
+export const createExpenseRecord = async (expenseData: {
+  date: string;
+  expense_item: string;
+  expense_category?: string;
+  cost: number;
+  channel?: string;
+  branch_or_platform?: string;
+  note?: string;
+}): Promise<void> => {
+  const expense = {
+    date: expenseData.date,
+    channel: expenseData.channel || 'store',
+    branch_or_platform: expenseData.branch_or_platform || '',
+    expense_item: expenseData.expense_item,
+    expense_category: expenseData.expense_category || '',
+    cost: expenseData.cost,
+    note: expenseData.note || ''
+  };
+
+  return addExpenseRecord(expense);
+};
+
 // Export configuration status
 export const getConfigurationStatus = () => {
   return {

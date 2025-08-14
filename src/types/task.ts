@@ -7,4 +7,9 @@ export interface TaskReminder {
   dueDate: Date;
   completed: boolean;
   createdAt: Date;
+  // Additional fields for complete record
+  productCategory?: string;
+  expenseCategory?: string;
+  channel?: 'store' | 'online';
+  branchOrPlatform?: string;
 }

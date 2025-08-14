@@ -1,4 +1,4 @@
-import { createExpenseRecord } from '../src/lib/vercel-sheets.js';
+import { createIncomeRecord } from '../src/lib/vercel-sheets.js';
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -12,27 +12,27 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const expenseData = req.body;
+      const incomeData = req.body;
       
       // Validate required fields
-      if (!expenseData.expense_item || !expenseData.cost) {
+      if (!incomeData.date || !incomeData.product_name || !incomeData.price) {
         return res.status(400).json({ 
-          error: 'Missing required fields: expense_item, cost' 
+          error: 'Missing required fields: date, product_name, price' 
         });
       }
 
-      // Create expense record
-      const result = await createExpenseRecord(expenseData);
+      // Create income record
+      const result = await createIncomeRecord(incomeData);
       
       return res.status(200).json({ 
         success: true, 
-        message: 'Expense record created successfully',
+        message: 'Income record created successfully',
         data: result 
       });
     } catch (error) {
-      console.error('Error creating expense record:', error);
+      console.error('Error creating income record:', error);
       return res.status(500).json({ 
-        error: 'Failed to create expense record',
+        error: 'Failed to create income record',
         details: error.message 
       });
     }

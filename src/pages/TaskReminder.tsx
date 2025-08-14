@@ -41,6 +41,11 @@ export function TaskReminder() {
     amount: 0,
     note: '',
     dueDate: new Date(),
+    // Additional fields for complete record
+    productCategory: '',
+    expenseCategory: '',
+    channel: 'store' as 'store' | 'online',
+    branchOrPlatform: '',
   });
 
   const [expenseConfirmDialog, setExpenseConfirmDialog] = useState<{
@@ -52,7 +57,9 @@ export function TaskReminder() {
   });
 
   const handleAddTask = () => {
-    if (!newTask.title || !newTask.amount) {
+    if (!newTask.title || !newTask.amount || !newTask.branchOrPlatform || 
+        (newTask.type === 'income' && !newTask.productCategory) ||
+        (newTask.type === 'expense' && !newTask.expenseCategory)) {
       toast({
         title: "ข้อผิดพลาด",
         description: "กรุณากรอกข้อมูลให้ครบถ้วน",
@@ -68,6 +75,10 @@ export function TaskReminder() {
       note: newTask.note,
       dueDate: newTask.dueDate,
       completed: false,
+      productCategory: newTask.productCategory,
+      expenseCategory: newTask.expenseCategory,
+      channel: newTask.channel,
+      branchOrPlatform: newTask.branchOrPlatform,
     });
 
     setNewTask({
@@ -76,6 +87,10 @@ export function TaskReminder() {
       amount: 0,
       note: '',
       dueDate: new Date(),
+      productCategory: '',
+      expenseCategory: '',
+      channel: 'store',
+      branchOrPlatform: '',
     });
     setIsAddDialogOpen(false);
   };
@@ -83,20 +98,20 @@ export function TaskReminder() {
   const handleToggleComplete = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      // If marking as complete and it's an expense task, ask if user wants to record it as expense
-      if (!task.completed && task.type === 'expense') {
+      // If marking as complete, ask if user wants to record it
+      if (!task.completed) {
         setExpenseConfirmDialog({
           isOpen: true,
           task: task,
         });
       } else {
-        // For income tasks or unchecking completed tasks, just toggle
+        // For unchecking completed tasks, just toggle
         updateTask({ taskId, updates: { completed: !task.completed } });
       }
     }
   };
 
-  const handleConfirmExpenseRecord = async (shouldRecord: boolean) => {
+  const handleConfirmRecord = async (shouldRecord: boolean) => {
     const task = expenseConfirmDialog.task;
     if (!task) return;
 
@@ -105,39 +120,63 @@ export function TaskReminder() {
 
     if (shouldRecord) {
       try {
-        // Create expense record
-        const expenseData = {
-          date: new Date().toISOString().split('T')[0], // Today's date
-          expense_item: task.title,
-          expense_category: 'อื่นๆ', // Default category
-          cost: task.amount,
-          channel: 'store', // Default channel
-          branch_or_platform: 'สาขาหลัก', // Default branch
-          note: task.note ? `จาก Task Reminder: ${task.note}` : 'จาก Task Reminder',
-        };
+        if (task.type === 'expense') {
+          // Create expense record
+          const expenseData = {
+            date: new Date().toISOString().split('T')[0],
+            expense_item: task.title,
+            expense_category: task.expenseCategory || 'อื่นๆ',
+            cost: task.amount,
+            channel: task.channel || 'store',
+            branch_or_platform: task.branchOrPlatform || 'สาขาหลัก',
+            note: task.note ? `จาก Task Reminder: ${task.note}` : 'จาก Task Reminder',
+          };
 
-        // Call expense API
-        const response = await fetch('/api/expenses', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(expenseData),
-        });
+          const response = await fetch('/api/expenses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(expenseData),
+          });
 
-        if (response.ok) {
+          if (!response.ok) throw new Error('Failed to record expense');
+
           toast({
             title: "บันทึกสำเร็จ",
             description: "บันทึกรายจ่ายเรียบร้อยแล้ว",
           });
         } else {
-          throw new Error('Failed to record expense');
+          // Create income record
+          const incomeData = {
+            date: new Date().toISOString().split('T')[0],
+            product_name: task.title,
+            product_category: task.productCategory || 'อื่นๆ',
+            price: task.amount,
+            quantity: 1,
+            total_amount: task.amount,
+            channel: task.channel || 'store',
+            branch_or_platform: task.branchOrPlatform || 'สาขาหลัก',
+            note: task.note ? `จาก Task Reminder: ${task.note}` : 'จาก Task Reminder',
+          };
+
+          // Assuming there's an income API endpoint
+          const response = await fetch('/api/income', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(incomeData),
+          });
+
+          if (!response.ok) throw new Error('Failed to record income');
+
+          toast({
+            title: "บันทึกสำเร็จ",
+            description: "บันทึกรายรับเรียบร้อยแล้ว",
+          });
         }
       } catch (error) {
-        console.error('Error recording expense:', error);
+        console.error('Error recording:', error);
         toast({
           title: "เกิดข้อผิดพลาด",
-          description: "ไม่สามารถบันทึกรายจ่ายได้ กรุณาบันทึกด้วยตนเอง",
+          description: `ไม่สามารถบันทึก${task.type === 'income' ? 'รายรับ' : 'รายจ่าย'}ได้ กรุณาบันทึกด้วยตนเอง`,
           variant: "destructive"
         });
       }
@@ -224,9 +263,12 @@ export function TaskReminder() {
                 เพิ่ม Task
               </Button>
             </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>เพิ่ม Task ใหม่</DialogTitle>
+              <DialogDescription>
+                กรอกข้อมูลให้ครบถ้วนเพื่อให้สามารถบันทึกเป็นรายรับ/รายจ่ายได้เมื่อเสร็จสิ้น Task
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -262,6 +304,53 @@ export function TaskReminder() {
                   placeholder="0"
                 />
               </div>
+
+              <div>
+                <Label htmlFor="channel">ช่องทางขาย *</Label>
+                <Select value={newTask.channel} onValueChange={(value: 'store' | 'online') => setNewTask(prev => ({ ...prev, channel: value }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="store">หน้าร้าน</SelectItem>
+                    <SelectItem value="online">ออนไลน์</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="branchOrPlatform">สาขา/แพลตฟอร์ม *</Label>
+                <Input
+                  id="branchOrPlatform"
+                  value={newTask.branchOrPlatform}
+                  onChange={(e) => setNewTask(prev => ({ ...prev, branchOrPlatform: e.target.value }))}
+                  placeholder={newTask.channel === 'online' ? 'เช่น Shopee, Lazada, Facebook' : 'เช่น สาขาหลัก, สาขา 2'}
+                />
+              </div>
+
+              {newTask.type === 'income' && (
+                <div>
+                  <Label htmlFor="productCategory">หมวดหมู่สินค้า *</Label>
+                  <Input
+                    id="productCategory"
+                    value={newTask.productCategory}
+                    onChange={(e) => setNewTask(prev => ({ ...prev, productCategory: e.target.value }))}
+                    placeholder="เช่น เสื้อผ้า, อาหาร, เครื่องใช้"
+                  />
+                </div>
+              )}
+
+              {newTask.type === 'expense' && (
+                <div>
+                  <Label htmlFor="expenseCategory">หมวดหมู่รายจ่าย *</Label>
+                  <Input
+                    id="expenseCategory"
+                    value={newTask.expenseCategory}
+                    onChange={(e) => setNewTask(prev => ({ ...prev, expenseCategory: e.target.value }))}
+                    placeholder="เช่น ค่าเช่า, ค่าไฟ, วัตถุดิบ"
+                  />
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="dueDate">กำหนดวัน *</Label>
@@ -365,14 +454,29 @@ export function TaskReminder() {
                           )}>
                             {task.title}
                           </h3>
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
                             <Badge variant={task.type === 'income' ? 'default' : 'secondary'}>
                               {task.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
                             </Badge>
                             <span className="text-sm font-medium">
                               {task.amount.toLocaleString()} บาท
                             </span>
+                            <Badge variant="outline" className="text-xs">
+                              {task.channel === 'store' ? 'หน้าร้าน' : 'ออนไลน์'}
+                            </Badge>
+                            {task.branchOrPlatform && (
+                              <Badge variant="outline" className="text-xs">
+                                {task.branchOrPlatform}
+                              </Badge>
+                            )}
                           </div>
+                          {(task.productCategory || task.expenseCategory) && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs text-muted-foreground">
+                                หมวดหมู่: {task.type === 'income' ? task.productCategory : task.expenseCategory}
+                              </span>
+                            </div>
+                          )}
                           {task.note && (
                             <p className="text-sm text-muted-foreground mt-2">
                               {task.note}
@@ -404,7 +508,7 @@ export function TaskReminder() {
         )}
       </div>
 
-      {/* Expense Confirmation Dialog */}
+      {/* Record Confirmation Dialog */}
       <AlertDialog open={expenseConfirmDialog.isOpen} onOpenChange={(open) => {
         if (!open) {
           setExpenseConfirmDialog({ isOpen: false, task: null });
@@ -414,19 +518,27 @@ export function TaskReminder() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Receipt className="h-5 w-5 text-orange-500" />
-              บันทึกรายจ่าย
+              บันทึก{expenseConfirmDialog.task?.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               คุณได้ทำ Task "{expenseConfirmDialog.task?.title}" เสร็จแล้ว
               <br />
               <br />
-              <strong>ต้องการบันทึกลงในรายการรายจ่ายด้วยไหม?</strong>
+              <strong>ต้องการบันทึกลงในรายการ{expenseConfirmDialog.task?.type === 'income' ? 'รายรับ' : 'รายจ่าย'}ด้วยไหม?</strong>
               <br />
               <br />
               <div className="bg-muted p-3 rounded-lg mt-2">
-                <div className="text-sm">
+                <div className="text-sm space-y-1">
                   <div><strong>รายการ:</strong> {expenseConfirmDialog.task?.title}</div>
                   <div><strong>จำนวน:</strong> {expenseConfirmDialog.task?.amount.toLocaleString()} บาท</div>
+                  <div><strong>ช่องทาง:</strong> {expenseConfirmDialog.task?.channel === 'store' ? 'หน้าร้าน' : 'ออนไลน์'}</div>
+                  <div><strong>สาขา/แพลตฟอร์ม:</strong> {expenseConfirmDialog.task?.branchOrPlatform}</div>
+                  {expenseConfirmDialog.task?.type === 'income' && expenseConfirmDialog.task?.productCategory && (
+                    <div><strong>หมวดหมู่สินค้า:</strong> {expenseConfirmDialog.task.productCategory}</div>
+                  )}
+                  {expenseConfirmDialog.task?.type === 'expense' && expenseConfirmDialog.task?.expenseCategory && (
+                    <div><strong>หมวดหมู่รายจ่าย:</strong> {expenseConfirmDialog.task.expenseCategory}</div>
+                  )}
                   {expenseConfirmDialog.task?.note && (
                     <div><strong>หมายเหตุ:</strong> {expenseConfirmDialog.task.note}</div>
                   )}
@@ -435,15 +547,15 @@ export function TaskReminder() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => handleConfirmExpenseRecord(false)}>
+            <AlertDialogCancel onClick={() => handleConfirmRecord(false)}>
               ไม่บันทึก (เสร็จ Task เท่านั้น)
             </AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => handleConfirmExpenseRecord(true)}
-              className="bg-orange-500 hover:bg-orange-600"
+              onClick={() => handleConfirmRecord(true)}
+              className={expenseConfirmDialog.task?.type === 'income' ? 'bg-green-500 hover:bg-green-600' : 'bg-orange-500 hover:bg-orange-600'}
             >
               <Receipt className="h-4 w-4 mr-2" />
-              บันทึกรายจ่าย
+              บันทึก{expenseConfirmDialog.task?.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

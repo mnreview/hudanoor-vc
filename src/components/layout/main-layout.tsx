@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Sidebar } from "./sidebar";
-import { SheetsInitializer } from "@/components/ui/sheets-initializer";
+
 import Index from "@/pages/Index";
 import { TaskReminder } from "@/pages/TaskReminder";
 import { EmployeeManagement } from "@/pages/EmployeeManagement";
@@ -65,9 +65,6 @@ export function MainLayout() {
       {/* Main Content */}
       <div className="lg:pl-64">
         <div className="container mx-auto px-4 py-6">
-          {/* Sheets Initializer */}
-          <SheetsInitializer />
-          
           {/* Page Content */}
           {renderCurrentPage()}
         </div>

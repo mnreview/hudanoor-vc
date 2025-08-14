@@ -98,6 +98,138 @@ export default async function handler(req, res) {
       }
     }
 
+    // Handle PUT request (update task)
+    if (req.method === 'PUT') {
+      const { taskId, updates } = req.body;
+      
+      if (!taskId || !updates) {
+        return res.status(400).json({ error: 'Task ID and updates are required' });
+      }
+
+      try {
+        // First, get all tasks to find the row
+        const readResponse = await sheets.spreadsheets.values.get({
+          spreadsheetId,
+          range,
+        });
+
+        const rows = readResponse.data.values || [];
+        const taskRowIndex = rows.findIndex(row => row[0] === taskId);
+
+        if (taskRowIndex === -1) {
+          return res.status(404).json({ error: 'Task not found' });
+        }
+
+        // Update the row
+        const currentRow = rows[taskRowIndex];
+        const updatedRow = [
+          taskId, // ID (A)
+          updates.title !== undefined ? updates.title : currentRow[1], // Title (B)
+          updates.type !== undefined ? updates.type : currentRow[2], // Type (C)
+          updates.amount !== undefined ? updates.amount : currentRow[3], // Amount (D)
+          updates.note !== undefined ? updates.note : currentRow[4], // Note (E)
+          updates.dueDate !== undefined ? updates.dueDate : currentRow[5], // DueDate (F)
+          updates.completed !== undefined ? (updates.completed ? 'เสร็จแล้ว' : 'รอดำเนินการ') : currentRow[6], // Completed (G)
+          currentRow[7] // CreatedAt (H) - keep original
+        ];
+
+        const updateResponse = await sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range: `${sheetName}!A${taskRowIndex + 1}:H${taskRowIndex + 1}`,
+          valueInputOption: 'USER_ENTERED',
+          resource: {
+            values: [updatedRow]
+          },
+        });
+
+        return res.status(200).json({ 
+          success: true,
+          updatedCells: updateResponse.data.updatedCells,
+          updatedRows: updateResponse.data.updatedRows,
+          updatedRange: updateResponse.data.updatedRange
+        });
+      } catch (error) {
+        if (error.message.includes('Unable to parse range')) {
+          return res.status(500).json({ 
+            error: 'Tasks sheet not found. Please create Tasks sheet in your Google Sheets first.',
+            details: error.message
+          });
+        }
+        throw error;
+      }
+    }
+
+    // Handle DELETE request (delete task)
+    if (req.method === 'DELETE') {
+      const { taskId } = req.query;
+      
+      if (!taskId) {
+        return res.status(400).json({ error: 'Task ID is required' });
+      }
+
+      try {
+        // First, get all tasks to find the row
+        const readResponse = await sheets.spreadsheets.values.get({
+          spreadsheetId,
+          range,
+        });
+
+        const rows = readResponse.data.values || [];
+        const taskRowIndex = rows.findIndex(row => row[0] === taskId);
+
+        if (taskRowIndex === -1) {
+          return res.status(404).json({ error: 'Task not found' });
+        }
+
+        // Get sheet ID for the Tasks sheet
+        const spreadsheet = await sheets.spreadsheets.get({
+          spreadsheetId
+        });
+
+        const tasksSheet = spreadsheet.data.sheets?.find(sheet => 
+          sheet.properties?.title === sheetName
+        );
+
+        if (!tasksSheet) {
+          return res.status(500).json({ error: 'Tasks sheet not found' });
+        }
+
+        const sheetId = tasksSheet.properties?.sheetId;
+
+        // Delete the row
+        await sheets.spreadsheets.batchUpdate({
+          spreadsheetId,
+          resource: {
+            requests: [
+              {
+                deleteDimension: {
+                  range: {
+                    sheetId: sheetId,
+                    dimension: 'ROWS',
+                    startIndex: taskRowIndex,
+                    endIndex: taskRowIndex + 1
+                  }
+                }
+              }
+            ]
+          }
+        });
+
+        return res.status(200).json({ 
+          success: true,
+          message: 'Task deleted successfully'
+        });
+      } catch (error) {
+        if (error.message.includes('Unable to parse range')) {
+          return res.status(500).json({ 
+            error: 'Tasks sheet not found. Please create Tasks sheet in your Google Sheets first.',
+            details: error.message
+          });
+        }
+        throw error;
+      }
+    }
+
     return res.status(405).json({ error: 'Method not allowed' });
 
   } catch (error) {

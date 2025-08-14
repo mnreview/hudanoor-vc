@@ -84,7 +84,7 @@ export const updateTaskRecord = async (taskId: string, updates: Partial<TaskRemi
     if (updates.dueDate !== undefined) updateData.dueDate = updates.dueDate.toISOString();
     if (updates.completed !== undefined) updateData.completed = updates.completed;
 
-    const response = await fetch(`${API_BASE}/data?type=tasks&action=update`, {
+    const response = await fetch(`${API_BASE}/tasks`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -107,12 +107,8 @@ export const updateTaskRecord = async (taskId: string, updates: Partial<TaskRemi
 // Delete task via Vercel API
 export const deleteTaskRecord = async (taskId: string): Promise<void> => {
   try {
-    const response = await fetch(`${API_BASE}/data?type=tasks&action=delete`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ taskId })
+    const response = await fetch(`${API_BASE}/tasks?taskId=${taskId}`, {
+      method: 'DELETE',
     });
 
     if (!response.ok) {

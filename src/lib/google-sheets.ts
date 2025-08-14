@@ -19,7 +19,7 @@ const isGoogleSheetsConfigured = () => {
 // Helper function to convert sheet data to Income objects
 const parseIncomeData = (rows: any[][]): Income[] => {
   if (!rows || rows.length <= 1) return [];
-  
+
   // Skip header row
   return rows.slice(1).map((row, index) => ({
     id: row[0] || `income_${index + 1}`,
@@ -39,7 +39,7 @@ const parseIncomeData = (rows: any[][]): Income[] => {
 // Helper function to convert sheet data to Expense objects
 const parseExpenseData = (rows: any[][]): Expense[] => {
   if (!rows || rows.length <= 1) return [];
-  
+
   // Skip header row
   return rows.slice(1).map((row, index) => ({
     id: row[0] || `expense_${index + 1}`,
@@ -64,12 +64,12 @@ export const getIncomeData = async (): Promise<Income[]> => {
   try {
     const url = `${BASE_URL}/${SPREADSHEET_ID}/values/${encodeURIComponent(INCOME_SHEET)}!A:K?key=${API_KEY}`;
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
-    
+
     const data = await response.json();
     return parseIncomeData(data.values || []);
   } catch (error) {
@@ -87,12 +87,12 @@ export const getExpenseData = async (): Promise<Expense[]> => {
   try {
     const url = `${BASE_URL}/${SPREADSHEET_ID}/values/${encodeURIComponent(EXPENSE_SHEET)}!A:J?key=${API_KEY}`;
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
-    
+
     const data = await response.json();
     return parseExpenseData(data.values || []);
   } catch (error) {
@@ -110,7 +110,7 @@ export const addIncomeRecord = async (income: Omit<Income, 'id' | 'createdAt' | 
   try {
     const id = `income_${Date.now()}`;
     const now = new Date().toISOString();
-    
+
     const values = [[
       id,
       income.date,
@@ -126,7 +126,7 @@ export const addIncomeRecord = async (income: Omit<Income, 'id' | 'createdAt' | 
     ]];
 
     const url = `${BASE_URL}/${SPREADSHEET_ID}/values/${encodeURIComponent(INCOME_SHEET)}!A:K:append?valueInputOption=RAW&key=${API_KEY}`;
-    
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -158,7 +158,7 @@ export const addExpenseRecord = async (expense: Omit<Expense, 'id' | 'createdAt'
   try {
     const id = `expense_${Date.now()}`;
     const now = new Date().toISOString();
-    
+
     const values = [[
       id,
       expense.date,
@@ -173,7 +173,7 @@ export const addExpenseRecord = async (expense: Omit<Expense, 'id' | 'createdAt'
     ]];
 
     const url = `${BASE_URL}/${SPREADSHEET_ID}/values/${encodeURIComponent(EXPENSE_SHEET)}!A:J:append?valueInputOption=RAW&key=${API_KEY}`;
-    
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -205,13 +205,13 @@ export const initializeSheets = async (): Promise<void> => {
   try {
     // Income sheet headers
     const incomeHeaders = [
-      'ID', 'วันที่', 'ช่องทาง', 'สาขา/แพลตฟอร์ม', 'ชื่อสินค้า', 
+      'ID', 'วันที่', 'ช่องทาง', 'สาขา/แพลตฟอร์ม', 'ชื่อสินค้า',
       'หมวดหมู่สินค้า', 'จำนวน', 'ยอดเงิน', 'หมายเหตุ', 'สร้างเมื่อ', 'แก้ไขเมื่อ'
     ];
 
     // Expense sheet headers
     const expenseHeaders = [
-      'ID', 'วันที่', 'ช่องทาง', 'สาขา/แพลตฟอร์ม', 'รายการค่าใช้จ่าย', 
+      'ID', 'วันที่', 'ช่องทาง', 'สาขา/แพลตฟอร์ม', 'รายการค่าใช้จ่าย',
       'หมวดหมู่ค่าใช้จ่าย', 'ยอดเงิน', 'หมายเหตุ', 'สร้างเมื่อ', 'แก้ไขเมื่อ'
     ];
 

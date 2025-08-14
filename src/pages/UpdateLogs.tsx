@@ -26,278 +26,7 @@ import {
   Loader2
 } from "lucide-react";
 
-const mockUpdateLogs: UpdateLog[] = [
-  {
-    id: "19",
-    version: "1.4.5",
-    date: "2024-12-08",
-    title: "เพิ่มระบบจัดการ Update Logs สำหรับ Vercel API",
-    description: "สร้างไฟล์ vercel-logs.ts ใหม่ที่รองรับการจัดการ Update Logs ผ่าน Vercel API อย่างสมบูรณ์ รวมฟังก์ชันการอ่าน เพิ่ม แก้ไข และลบ logs พร้อมการแปลงข้อมูลจาก Google Sheets format ให้ระบบ Update Logs สามารถทำงานผ่าน Vercel Serverless Functions ได้",
-    type: "feature",
-    isImportant: true,
-    createdAt: "2024-12-08T23:59:59Z"
-  },
-  {
-    id: "18",
-    version: "1.4.4",
-    date: "2024-12-08",
-    title: "แก้ไขปัญหา TypeScript ในหน้าจัดการพนักงาน",
-    description: "แก้ไขปัญหา TypeScript error ในฟังก์ชัน refetch ที่ทำให้ปุ่ม 'ลองใหม่อีกครั้ง' ไม่ทำงานได้อย่างถูกต้อง โดยเปลี่ยนจาก onClick={refetch} เป็น onClick={() => refetch()} เพื่อให้สามารถเรียกใช้ฟังก์ชันได้อย่างถูกต้อง",
-    type: "bugfix",
-    isImportant: false,
-    createdAt: "2024-12-08T23:59:59Z"
-  },
-  {
-    id: "17",
-    version: "1.4.3",
-    date: "2024-12-08",
-    title: "เชื่อมต่อหน้าจัดการพนักงานกับ Vercel API",
-    description: "อัปเดตหน้าจัดการพนักงานให้ใช้ useEmployees hook แทนการใช้ mock data ทำให้สามารถจัดการข้อมูลพนักงานจริงผ่าน Google Sheets ได้ รวมฟังก์ชันการเพิ่ม แก้ไข และลบพนักงาน พร้อมแสดงสถานะการโหลดและข้อผิดพลาด",
-    type: "improvement",
-    isImportant: true,
-    createdAt: "2024-12-08T23:59:59Z"
-  },
-  {
-    id: "16",
-    version: "1.4.2",
-    date: "2024-12-08",
-    title: "เพิ่มระบบจัดการพนักงานสำหรับ Vercel API",
-    description: "สร้างไฟล์ vercel-employees.ts ใหม่ที่รองรับการจัดการข้อมูลพนักงานผ่าน Vercel API อย่างสมบูรณ์ รวมฟังก์ชันการอ่าน เพิ่ม แก้ไข และลบข้อมูลพนักงาน พร้อมการทดสอบการเชื่อมต่อและการแปลงข้อมูลจาก Google Sheets format",
-    type: "feature",
-    isImportant: true,
-    createdAt: "2024-12-08T23:59:58Z"
-  },
-  {
-    id: "15",
-    version: "1.4.1",
-    date: "2024-12-08",
-    title: "ปรับปรุง Tasks API endpoint ให้เรียบง่ายขึ้น",
-    description: "เปลี่ยน endpoint สำหรับการอ่านข้อมูล tasks จาก /api/data?type=tasks&action=read กลับเป็น /api/tasks เพื่อให้การเรียกใช้งานเรียบง่ายและตรงไปตรงมามากขึ้น ช่วยลดความซับซ้อนในการจัดการ API calls",
-    type: "improvement",
-    isImportant: false,
-    createdAt: "2024-12-08T23:59:58Z"
-  },
-  {
-    id: "14",
-    version: "1.4.0",
-    date: "2024-12-08",
-    title: "อัปเดต Tasks API endpoint ให้ใช้ unified data API",
-    description: "เปลี่ยน endpoint สำหรับการอ่านข้อมูล tasks จาก /api/tasks/read เป็น /api/data?type=tasks&action=read เพื่อให้สอดคล้องกับสถาปัตยกรรม unified API ที่ใช้ในระบบ Vercel ทำให้การจัดการ API endpoints มีความสม่ำเสมอและง่ายต่อการบำรุงรักษา",
-    type: "improvement",
-    isImportant: false,
-    createdAt: "2024-12-08T23:59:55Z"
-  },
-  {
-    id: "13",
-    version: "1.3.9",
-    date: "2024-12-08",
-    title: "อัปเดต Task API ให้ใช้ Vercel API แทน Google Apps Script",
-    description: "เปลี่ยนฟังก์ชัน addTaskRecord ใน task-api.ts ให้ใช้ Vercel API โดยตรงแทนการเรียก Google Apps Script ผ่าน JSONP ทำให้ระบบ Task Management ทำงานผ่าน Vercel Serverless Functions อย่างสมบูรณ์และเสถียรมากขึ้น",
-    type: "improvement",
-    isImportant: true,
-    createdAt: "2024-12-08T23:59:50Z"
-  },
-  {
-    id: "11",
-    version: "1.3.7",
-    date: "2024-12-08",
-    title: "เพิ่มระบบ Task Management สำหรับ Vercel API",
-    description: "สร้างไฟล์ vercel-tasks.ts ใหม่ที่รองรับการจัดการ Task Reminders ผ่าน Vercel API อย่างสมบูรณ์ รวมฟังก์ชันการอ่าน เพิ่ม แก้ไข และลบ tasks พร้อมการทดสอบการเชื่อมต่อและการตั้งค่า sheet headers อัตโนมัติ",
-    type: "feature",
-    isImportant: true,
-    createdAt: "2024-12-08T23:59:45Z"
-  },
-  {
-    id: "10",
-    version: "1.3.6",
-    date: "2024-12-08",
-    title: "อัปเดตเอกสาร README สำหรับสถาปัตยกรรมใหม่",
-    description: "อัปเดต README.md ให้สะท้อนการเปลี่ยนแปลงสถาปัตยกรรมจาก Google Apps Script เป็น Vercel Serverless Functions พร้อมระบุการใช้ Google Sheets API โดยตรงแทนการผ่าน Google Apps Script",
-    type: "improvement",
-    isImportant: false,
-    createdAt: "2024-12-08T23:59:30Z"
-  },
-  {
-    id: "09",
-    version: "1.3.5",
-    date: "2024-12-08",
-    title: "เสร็จสิ้นการย้ายไป Vercel API อย่างสมบูรณ์",
-    description: "อัปเดต sheets-adapter.ts ให้ใช้ Vercel API เป็นหลักในทุกสถานการณ์ โดยลบ conditional logic ที่เลือกระหว่าง Google Sheets API และ Vercel API ออก ทำให้ระบบใช้ Vercel Serverless Functions อย่างเต็มรูปแบบและเสถียรมากขึ้น",
-    type: "improvement",
-    isImportant: true,
-    createdAt: "2024-12-08T23:59:00Z"
-  },
-  {
-    id: "08",
-    version: "1.3.4",
-    date: "2024-12-08",
-    title: "อัปเดต Connection Status Component ให้ใช้ Vercel API",
-    description: "เปลี่ยน Connection Status component ให้ใช้ getConfigurationStatus จาก vercel-sheets แทน google-apps-script เพื่อให้แสดงสถานะการเชื่อมต่อที่ถูกต้องสำหรับระบบ Vercel",
-    type: "improvement",
-    isImportant: false,
-    createdAt: "2024-12-08T23:58:00Z"
-  },
-  {
-    id: "07",
-    version: "1.3.3",
-    date: "2024-12-08",
-    title: "เปลี่ยนไปใช้ Vercel API โดยตรง",
-    description: "อัปเดต use-sheets-data hook ให้ใช้ Vercel API โดยตรงแทนการใช้ sheets-adapter เพื่อให้ระบบทำงานกับ Vercel Serverless Functions อย่างเต็มประสิทธิภาพ ช่วยลดความซับซ้อนและเพิ่มความเสถียรของระบบ",
-    type: "improvement",
-    isImportant: true,
-    createdAt: "2024-12-08T23:55:00Z"
-  },
-  {
-    id: "06",
-    version: "1.3.2",
-    date: "2024-12-08",
-    title: "เพิ่มระบบ Adaptive Sheets API",
-    description: "สร้างไฟล์ sheets-adapter.ts ใหม่ที่ทำหน้าที่เป็น adapter layer ระหว่าง Google Sheets API และ Vercel API โดยจะเลือกใช้ API ที่เหมาะสมตามสภาพแวดล้อม (development/production) และการตั้งค่าที่มีอยู่ ช่วยให้ระบบทำงานได้อย่างราบรื่นในทุกสถานการณ์",
-    type: "improvement",
-    isImportant: true,
-    createdAt: "2024-12-08T23:50:00Z"
-  },
-  {
-    id: "05",
-    version: "1.3.1",
-    date: "2024-12-08",
-    title: "เพิ่มระบบ Vercel Sheets Integration",
-    description: "สร้างไฟล์ vercel-sheets.ts ใหม่สำหรับการเชื่อมต่อกับ Google Sheets ผ่าน Vercel API endpoints พร้อมฟังก์ชันการอ่าน เขียน และอัปเดตข้อมูลรายรับ-รายจ่าย รองรับการทำงานทั้งใน development และ production environment",
-    type: "feature",
-    isImportant: true,
-    createdAt: "2024-12-08T23:45:00Z"
-  },
-  {
-    id: "04",
-    version: "1.3.0",
-    date: "2024-12-08",
-    title: "เพิ่ม googleapis package สำหรับการย้ายไป Vercel",
-    description: "เพิ่ม googleapis package เวอร์ชั่น 144.0.0 เพื่อรองรับการใช้งาน Google Sheets API ในระบบ Vercel Serverless Functions ตามแผนการย้ายจาก Google Apps Script",
-    type: "improvement",
-    isImportant: true,
-    createdAt: "2024-12-08T23:30:00Z"
-  },
-  {
-    id: "03",
-    version: "1.2.9",
-    date: "2024-12-08",
-    title: "แก้ไขปัญหา JSX syntax error ในหน้า Task Reminder",
-    description: "แก้ไขปัญหา JSX element ที่ไม่มี closing tag ในหน้า Task Reminder ซึ่งทำให้เกิด compilation error และไม่สามารถใช้งานระบบได้",
-    type: "bugfix",
-    isImportant: false,
-    createdAt: "2024-12-08T23:00:00Z"
-  },
-  {
-    id: "02",
-    version: "1.2.8",
-    date: "2024-12-08",
-    title: "เพิ่มฟังก์ชันทดสอบการเชื่อมต่อใน Task Reminder",
-    description: "เพิ่มฟังก์ชัน handleTestConnection() ในหน้า Task Reminder เพื่อให้ผู้ใช้สามารถทดสอบการเชื่อมต่อกับ Google Apps Script ได้โดยตรง พร้อมแสดงผลการทดสอบผ่าน toast notification",
-    type: "improvement",
-    isImportant: false,
-    createdAt: "2024-12-08T22:00:00Z"
-  },
-  {
-    id: "01",
-    version: "1.2.7",
-    date: "2024-12-08",
-    title: "เพิ่มระบบ Debug และ Connection Testing สำหรับ Task Reminder",
-    description: "เพิ่มฟังก์ชัน testConnection() และ console logging ใน task-api.ts เพื่อช่วยในการ debug และตรวจสอบการเชื่อมต่อกับ Google Apps Script ในระบบ Task Reminder",
-    type: "improvement",
-    isImportant: false,
-    createdAt: "2024-12-08T21:00:00Z"
-  },
-  {
-    id: "00",
-    version: "1.2.6",
-    date: "2024-12-08",
-    title: "แก้ไขปัญหา TypeScript imports ในระบบ Task Reminder",
-    description: "แก้ไขปัญหาการ import types ในไฟล์ task-api.ts และเพิ่ม TaskReminder type export ในไฟล์ types หลัก เพื่อให้ระบบ Task Reminder ทำงานได้อย่างถูกต้อง",
-    type: "bugfix",
-    isImportant: false,
-    createdAt: "2024-12-08T20:00:00Z"
-  },
-  {
-    id: "0",
-    version: "1.2.5",
-    date: "2024-12-08",
-    title: "แก้ไขปัญหาการเลือกรูปแบบวันที่ในหน้าการตั้งค่า",
-    description: "แก้ไขบัคที่ทำให้ไม่สามารถเปลี่ยนรูปแบบวันที่ได้ เนื่องจากใช้ state variable ผิดตัว (settings แทน localSettings)",
-    type: "bugfix",
-    isImportant: false,
-    createdAt: "2024-12-08T19:00:00Z"
-  },
-  {
-    id: "1",
-    version: "1.2.4",
-    date: "2024-12-08",
-    title: "แก้ไขปัญหา React Hook ในหน้าการตั้งค่า",
-    description: "แก้ไขการใช้ useState แทน useEffect ที่ทำให้เกิด error ในการอัปเดต localSettings เมื่อ settings เปลี่ยนแปลง",
-    type: "bugfix",
-    isImportant: false,
-    createdAt: "2024-12-08T18:00:00Z"
-  },
-  {
-    id: "2",
-    version: "1.2.3",
-    date: "2024-12-08",
-    title: "แก้ไขปัญหาการแก้ไขสโลแกนร้านในหน้าการตั้งค่า",
-    description: "แก้ไขบัคที่ทำให้ไม่สามารถแก้ไขสโลแกนร้านได้ในหน้าการตั้งค่า เนื่องจากใช้ state ผิดตัวแปร",
-    type: "bugfix",
-    isImportant: false,
-    createdAt: "2024-12-08T17:00:00Z"
-  },
-  {
-    id: "3",
-    version: "1.2.2",
-    date: "2024-12-08",
-    title: "เชื่อมต่อหน้าการตั้งค่ากับ Settings API",
-    description: "อัปเดตหน้าการตั้งค่าให้ใช้งาน useSettings hook และเชื่อมต่อกับ Settings API สำหรับการบันทึกและโหลดการตั้งค่าจริง",
-    type: "improvement",
-    isImportant: false,
-    createdAt: "2024-12-08T16:00:00Z"
-  },
-  {
-    id: "4",
-    version: "1.2.1",
-    date: "2024-12-08",
-    title: "เพิ่มระบบจัดการการตั้งค่าแบบ Hybrid",
-    description: "เพิ่ม Settings API ที่รองรับการบันทึกข้อมูลทั้งใน Google Sheets และ localStorage พร้อม fallback mechanism เพื่อให้ระบบทำงานได้แม้ไม่มีการเชื่อมต่อ Google Apps Script",
-    type: "improvement",
-    isImportant: false,
-    createdAt: "2024-12-08T15:30:00Z"
-  },
-  {
-    id: "5",
-    version: "1.2.0",
-    date: "2024-12-08",
-    title: "เพิ่มระบบจัดการพนักงานและการตั้งค่า",
-    description: "เพิ่มหน้าจัดการพนักงาน หน้าการตั้งค่า และหน้า Update Logs สำหรับติดตามการอัพเดท",
-    type: "feature",
-    isImportant: true,
-    createdAt: "2024-12-08T10:00:00Z"
-  },
-  {
-    id: "6", 
-    version: "1.1.5",
-    date: "2024-12-05",
-    title: "แก้ไขปัญหาการแสดงผลกราฟ",
-    description: "แก้ไขปัญหาการแสดงผลกราฟที่ไม่ถูกต้องเมื่อมีข้อมูลน้อย",
-    type: "bugfix",
-    isImportant: false,
-    createdAt: "2024-12-05T14:30:00Z"
-  },
-  {
-    id: "7",
-    version: "1.1.4", 
-    date: "2024-12-01",
-    title: "ปรับปรุงประสิทธิภาพการโหลดข้อมูล",
-    description: "เพิ่มความเร็วในการโหลดข้อมูลจาก Google Sheets และปรับปรุง UI/UX",
-    type: "improvement",
-    isImportant: false,
-    createdAt: "2024-12-01T09:15:00Z"
-  }
-];
+
 
 const typeConfig = {
   feature: { label: "ฟีเจอร์ใหม่", icon: Plus, color: "bg-blue-500" },
@@ -307,7 +36,19 @@ const typeConfig = {
 };
 
 export function UpdateLogs() {
-  const [logs, setLogs] = useState<UpdateLog[]>(mockUpdateLogs);
+  const {
+    logs,
+    isLoading,
+    error,
+    addLog,
+    updateLog,
+    deleteLog,
+    isAddingLog,
+    isUpdatingLog,
+    isDeletingLog,
+    refetch
+  } = useLogs();
+
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingLog, setEditingLog] = useState<UpdateLog | null>(null);
   const [formData, setFormData] = useState({
@@ -318,32 +59,38 @@ export function UpdateLogs() {
     isImportant: false
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newLog: UpdateLog = {
-      id: editingLog?.id || Date.now().toString(),
-      ...formData,
+    const logData = {
+      version: formData.version,
+      title: formData.title,
+      description: formData.description,
+      type: formData.type,
       date: new Date().toISOString().split('T')[0],
-      createdAt: editingLog?.createdAt || new Date().toISOString()
+      isImportant: formData.isImportant
     };
 
-    if (editingLog) {
-      setLogs(logs.map(log => log.id === editingLog.id ? newLog : log));
-    } else {
-      setLogs([newLog, ...logs]);
-    }
+    try {
+      if (editingLog) {
+        await updateLog({ logId: editingLog.id, updates: logData });
+      } else {
+        await addLog(logData);
+      }
 
-    // Reset form
-    setFormData({
-      version: "",
-      title: "",
-      description: "",
-      type: "feature",
-      isImportant: false
-    });
-    setIsAddDialogOpen(false);
-    setEditingLog(null);
+      // Reset form
+      setFormData({
+        version: "",
+        title: "",
+        description: "",
+        type: "feature",
+        isImportant: false
+      });
+      setIsAddDialogOpen(false);
+      setEditingLog(null);
+    } catch (error) {
+      console.error('Error submitting log:', error);
+    }
   };
 
   const handleEdit = (log: UpdateLog) => {
@@ -358,8 +105,12 @@ export function UpdateLogs() {
     setIsAddDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setLogs(logs.filter(log => log.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteLog(id);
+    } catch (error) {
+      console.error('Error deleting log:', error);
+    }
   };
 
   return (
@@ -463,8 +214,15 @@ export function UpdateLogs() {
                 }}>
                   ยกเลิก
                 </Button>
-                <Button type="submit">
-                  {editingLog ? "บันทึกการแก้ไข" : "เพิ่ม Update Log"}
+                <Button type="submit" disabled={isAddingLog || isUpdatingLog}>
+                  {(isAddingLog || isUpdatingLog) ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      กำลังบันทึก...
+                    </>
+                  ) : (
+                    editingLog ? "บันทึกการแก้ไข" : "เพิ่ม Update Log"
+                  )}
                 </Button>
               </div>
             </form>
@@ -472,9 +230,36 @@ export function UpdateLogs() {
         </Dialog>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">กำลังโหลด Update Logs...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">เกิดข้อผิดพลาด</h3>
+            <p className="text-muted-foreground text-center mb-4">
+              ไม่สามารถโหลด Update Logs ได้
+            </p>
+            <Button onClick={() => refetch()} variant="outline">
+              ลองใหม่อีกครั้ง
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Update Logs List */}
-      <div className="space-y-4">
-        {logs.map((log) => {
+      {!isLoading && !error && (
+        <div className="space-y-4">
+          {logs.map((log) => {
           const config = typeConfig[log.type];
           const Icon = config.icon;
           
@@ -524,9 +309,14 @@ export function UpdateLogs() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(log.id)}
+                      disabled={isDeletingLog}
                       className="text-red-600 hover:text-red-700"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {isDeletingLog ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -540,8 +330,9 @@ export function UpdateLogs() {
           );
         })}
       </div>
+      )}
 
-      {logs.length === 0 && (
+      {logs.length === 0 && !isLoading && !error && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Calendar className="h-12 w-12 text-muted-foreground mb-4" />

@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Employee, EmployeeCommissionReport, BranchCommission } from "@/types/employee";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useEmployees } from "@/hooks/use-employees";
+import { useSettings } from "@/hooks/use-settings";
 import {
   Plus,
   Users,
@@ -107,6 +108,7 @@ export function EmployeeManagement() {
     refetch
   } = useEmployees();
 
+  const { settings } = useSettings();
   const [commissionReports] = useState<EmployeeCommissionReport[]>(mockCommissionReports);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
@@ -326,12 +328,21 @@ export function EmployeeManagement() {
                       <div key={index} className="flex gap-2 items-end p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex-1">
                           <Label className="text-xs">สาขา/แพลตฟอร์ม</Label>
-                          <Input
-                            placeholder="เลือกหรือพิมพ์ชื่อสาขา"
+                          <Select
                             value={commission.branchOrPlatform}
-                            onChange={(e) => updateBranchCommission(index, 'branchOrPlatform', e.target.value)}
-                            className="text-sm"
-                          />
+                            onValueChange={(value) => updateBranchCommission(index, 'branchOrPlatform', value)}
+                          >
+                            <SelectTrigger className="text-sm">
+                              <SelectValue placeholder="เลือกสาขา/แพลตฟอร์ม" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(settings.branches || ['สาขาหลัก']).map(branch => (
+                                <SelectItem key={branch} value={branch}>
+                                  {branch}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="w-24">
                           <Label className="text-xs">คอม (%)</Label>

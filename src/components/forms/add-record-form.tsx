@@ -16,6 +16,7 @@ import { CalendarIcon, Plus } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";
 import { Income, Expense, Channel } from "@/types";
 import { toast } from "@/hooks/use-toast";
+import { useSettings } from "@/hooks/use-settings";
 
 interface AddRecordFormProps {
   onSubmit: (record: Omit<Income, 'id' | 'createdAt' | 'updatedAt'> | Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => void;
@@ -23,6 +24,7 @@ interface AddRecordFormProps {
 }
 
 export function AddRecordForm({ onSubmit, isSubmitting = false }: AddRecordFormProps) {
+  const { settings } = useSettings();
   const [activeTab, setActiveTab] = useState<'income' | 'expense'>('income');
   const [date, setDate] = useState<Date>(new Date());
   const [channel, setChannel] = useState<Channel>('store');
@@ -191,21 +193,14 @@ export function AddRecordForm({ onSubmit, isSubmitting = false }: AddRecordFormP
                   onValueChange={(value) => setIncomeForm(prev => ({ ...prev, branch_or_platform: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={channel === 'store' ? 'เลือกสาขา' : 'เลือกแพลตฟอร์ม'} />
+                    <SelectValue placeholder="เลือกสาขา/แพลตฟอร์ม" />
                   </SelectTrigger>
                   <SelectContent>
-                    {channel === 'store' ? (
-                      <>
-                        <SelectItem value="Lotus Yala">Lotus Yala</SelectItem>
-                        <SelectItem value="ตลาดใหม่">ตลาดใหม่</SelectItem>
-                      </>
-                    ) : (
-                      <>
-                        <SelectItem value="Tiktok">Tiktok</SelectItem>
-                        <SelectItem value="Facebook">Facebook</SelectItem>
-                        <SelectItem value="Shopee">Shopee</SelectItem>
-                      </>
-                    )}
+                    {(settings.branches || ['สาขาหลัก']).map(branch => (
+                      <SelectItem key={branch} value={branch}>
+                        {branch}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -308,21 +303,14 @@ export function AddRecordForm({ onSubmit, isSubmitting = false }: AddRecordFormP
                   onValueChange={(value) => setExpenseForm(prev => ({ ...prev, branch_or_platform: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={channel === 'store' ? 'เลือกสาขา' : 'เลือกแพลตฟอร์ม'} />
+                    <SelectValue placeholder="เลือกสาขา/แพลตฟอร์ม" />
                   </SelectTrigger>
                   <SelectContent>
-                    {channel === 'store' ? (
-                      <>
-                        <SelectItem value="Lotus Yala">Lotus Yala</SelectItem>
-                        <SelectItem value="ตลาดใหม่">ตลาดใหม่</SelectItem>
-                      </>
-                    ) : (
-                      <>
-                        <SelectItem value="Tiktok">Tiktok</SelectItem>
-                        <SelectItem value="Facebook">Facebook</SelectItem>
-                        <SelectItem value="Shopee">Shopee</SelectItem>
-                      </>
-                    )}
+                    {(settings.branches || ['สาขาหลัก']).map(branch => (
+                      <SelectItem key={branch} value={branch}>
+                        {branch}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

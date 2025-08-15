@@ -28,9 +28,11 @@ export function DashboardFilters({
   availableProductCategories,
   availableExpenseCategories
 }: DashboardFiltersProps) {
-  const [datePickerOpen, setDatePickerOpen] = useState({ from: false, to: false });
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isCustomDateMode, setIsCustomDateMode] = useState(false);
+  const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
+  const [tempDateRange, setTempDateRange] = useState<{ from?: Date; to?: Date }>({});
 
   const clearFilters = () => {
     onFiltersChange({});
@@ -40,7 +42,7 @@ export function DashboardFilters({
 
   // Helper function to get current date range preset
   const getDateRangePreset = (filters: FilterOptions): string => {
-    if (!filters.dateFrom && !filters.dateTo) return 'all';
+    if (!filters.dateFrom && !filters.dateTo) return 'max';
 
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -59,6 +61,13 @@ export function DashboardFilters({
       return 'last30days';
     }
 
+    // Check for this month
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    if (filters.dateFrom === thisMonthStart.toISOString() && filters.dateTo === thisMonthEnd.toISOString()) {
+      return 'thisMonth';
+    }
+
     // Check for last month
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -66,18 +75,18 @@ export function DashboardFilters({
       return 'lastMonth';
     }
 
-    // Check for last year
-    const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
-    const lastYearEnd = new Date(now.getFullYear() - 1, 11, 31);
-    if (filters.dateFrom === lastYearStart.toISOString() && filters.dateTo === lastYearEnd.toISOString()) {
-      return 'lastYear';
-    }
-
     // Check for this year
     const thisYearStart = new Date(now.getFullYear(), 0, 1);
     const thisYearEnd = new Date(now.getFullYear(), 11, 31);
     if (filters.dateFrom === thisYearStart.toISOString() && filters.dateTo === thisYearEnd.toISOString()) {
       return 'thisYear';
+    }
+
+    // Check for last year
+    const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
+    const lastYearEnd = new Date(now.getFullYear() - 1, 11, 31);
+    if (filters.dateFrom === lastYearStart.toISOString() && filters.dateTo === lastYearEnd.toISOString()) {
+      return 'lastYear';
     }
 
     return 'custom';
@@ -89,7 +98,7 @@ export function DashboardFilters({
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     switch (preset) {
-      case 'all':
+      case 'max':
         setIsCustomDateMode(false);
         onFiltersChange({ ...filters, dateFrom: undefined, dateTo: undefined });
         break;
@@ -116,6 +125,17 @@ export function DashboardFilters({
         });
         break;
 
+      case 'thisMonth':
+        setIsCustomDateMode(false);
+        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        onFiltersChange({
+          ...filters,
+          dateFrom: thisMonthStart.toISOString(),
+          dateTo: thisMonthEnd.toISOString()
+        });
+        break;
+
       case 'lastMonth':
         setIsCustomDateMode(false);
         const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -124,17 +144,6 @@ export function DashboardFilters({
           ...filters,
           dateFrom: lastMonthStart.toISOString(),
           dateTo: lastMonthEnd.toISOString()
-        });
-        break;
-
-      case 'lastYear':
-        setIsCustomDateMode(false);
-        const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
-        const lastYearEnd = new Date(now.getFullYear() - 1, 11, 31);
-        onFiltersChange({
-          ...filters,
-          dateFrom: lastYearStart.toISOString(),
-          dateTo: lastYearEnd.toISOString()
         });
         break;
 
@@ -149,9 +158,22 @@ export function DashboardFilters({
         });
         break;
 
+      case 'lastYear':
+        setIsCustomDateMode(false);
+        const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
+        const lastYearEnd = new Date(now.getFullYear() - 1, 11, 31);
+        onFiltersChange({
+          ...filters,
+          dateFrom: lastYearStart.toISOString(),
+          dateTo: lastYearEnd.toISOString()
+        });
+        break;
+
       case 'custom':
         // Set custom mode to show date pickers
         setIsCustomDateMode(true);
+        setTempDateRange({});
+        setSelectedStartDate(undefined);
         break;
 
       default:
@@ -159,23 +181,43 @@ export function DashboardFilters({
     }
   };
 
-  // Handle custom date selection with auto-close and auto-switch to custom mode
-  const handleDateSelect = (date: Date | undefined, type: 'from' | 'to') => {
-    if (date) {
-      const newFilters = { ...filters };
-      if (type === 'from') {
-        newFilters.dateFrom = date.toISOString();
-      } else {
-        newFilters.dateTo = date.toISOString();
-      }
-      onFiltersChange(newFilters);
+  // Handle calendar date selection with two-click confirmation
+  const handleCalendarDateSelect = (date: Date | undefined) => {
+    if (!date) return;
 
-      // Close the date picker
-      setDatePickerOpen(prev => ({ ...prev, [type]: false }));
+    if (!selectedStartDate) {
+      // First click - select start date
+      setSelectedStartDate(date);
+      setTempDateRange({ from: date, to: undefined });
+    } else {
+      // Second click - select end date and confirm range
+      const startDate = selectedStartDate;
+      const endDate = date;
       
-      // Auto switch to custom mode when user manually selects dates
+      // Ensure start date is before end date
+      const finalStartDate = startDate <= endDate ? startDate : endDate;
+      const finalEndDate = startDate <= endDate ? endDate : startDate;
+      
+      // Apply the date range
+      onFiltersChange({
+        ...filters,
+        dateFrom: finalStartDate.toISOString(),
+        dateTo: finalEndDate.toISOString()
+      });
+      
+      // Reset selection state
+      setSelectedStartDate(undefined);
+      setTempDateRange({});
+      setDatePickerOpen(false);
       setIsCustomDateMode(true);
     }
+  };
+
+  // Reset calendar selection when opening
+  const handleCalendarOpen = () => {
+    setSelectedStartDate(undefined);
+    setTempDateRange({});
+    setDatePickerOpen(true);
   };
 
   // Get date range label for display
@@ -187,12 +229,14 @@ export function DashboardFilters({
         return '7 วันที่ผ่านมา';
       case 'last30days':
         return '30 วันที่ผ่านมา';
+      case 'thisMonth':
+        return 'เดือนนี้';
       case 'lastMonth':
         return 'เดือนที่แล้ว';
-      case 'lastYear':
-        return 'ปีที่แล้ว';
       case 'thisYear':
         return 'ปีนี้';
+      case 'lastYear':
+        return 'ปีที่แล้ว';
       case 'custom':
         if (filters.dateFrom && filters.dateTo) {
           return `${formatDate(filters.dateFrom)} - ${formatDate(filters.dateTo)}`;
@@ -202,9 +246,9 @@ export function DashboardFilters({
           return `ถึง ${formatDate(filters.dateTo)}`;
         }
         return '';
-      case 'all':
+      case 'max':
       default:
-        return '';
+        return 'สูงสุด';
     }
   };
 
@@ -244,12 +288,13 @@ export function DashboardFilters({
                   <SelectValue placeholder="เลือกช่วงเวลา" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">ทั้งหมด</SelectItem>
                   <SelectItem value="last7days">7 วันที่ผ่านมา</SelectItem>
                   <SelectItem value="last30days">30 วันที่ผ่านมา</SelectItem>
+                  <SelectItem value="thisMonth">เดือนนี้</SelectItem>
                   <SelectItem value="lastMonth">เดือนที่แล้ว</SelectItem>
-                  <SelectItem value="lastYear">ปีที่แล้ว</SelectItem>
                   <SelectItem value="thisYear">ปีนี้</SelectItem>
+                  <SelectItem value="lastYear">ปีที่แล้ว</SelectItem>
+                  <SelectItem value="max">สูงสุด</SelectItem>
                   <SelectItem value="custom">กำหนดเอง</SelectItem>
                 </SelectContent>
               </Select>
@@ -268,75 +313,69 @@ export function DashboardFilters({
                 </div>
               )}
 
-              {/* Custom Date Range */}
+              {/* Custom Date Range with Two-Click Calendar */}
               {(getDateRangePreset(filters) === 'custom' || isCustomDateMode) && (
-                <div className="mt-2 space-y-2">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">จากวันที่</Label>
-                    <Popover open={datePickerOpen.from} onOpenChange={(open) => setDatePickerOpen(prev => ({ ...prev, from: open }))}>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal">
-                          <CalendarIcon className="mr-2 h-3 w-3" />
-                          <span className="text-xs">
-                            {filters.dateFrom ? formatDate(filters.dateFrom) : "เลือกวันที่"}
-                          </span>
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <div className="p-3 border-b bg-muted/50">
-                          <div className="text-sm font-medium">เลือกวันเริ่มต้น</div>
-                          <div className="text-xs text-muted-foreground">
-                            {filters.dateTo && `จะเลือกถึง ${formatDate(filters.dateTo)}`}
-                          </div>
+                <div className="mt-2">
+                  <Label className="text-xs text-muted-foreground mb-2 block">เลือกช่วงวันที่</Label>
+                  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full justify-start text-left font-normal"
+                        onClick={handleCalendarOpen}
+                      >
+                        <CalendarIcon className="mr-2 h-3 w-3" />
+                        <span className="text-xs">
+                          {filters.dateFrom && filters.dateTo 
+                            ? `${formatDate(filters.dateFrom)} - ${formatDate(filters.dateTo)}`
+                            : "คลิกเพื่อเลือกช่วงวันที่"
+                          }
+                        </span>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <div className="p-3 border-b bg-muted/50">
+                        <div className="text-sm font-medium">
+                          {!selectedStartDate ? 'คลิกครั้งที่ 1: เลือกวันเริ่มต้น' : 'คลิกครั้งที่ 2: เลือกวันสิ้นสุด'}
                         </div>
-                        <Calendar
-                          mode="single"
-                          selected={filters.dateFrom ? new Date(filters.dateFrom) : undefined}
-                          onSelect={(date) => {
-                            handleDateSelect(date, 'from');
-                            // Auto switch to custom mode when user manually selects dates
-                            if (date) {
-                              setIsCustomDateMode(true);
-                            }
-                          }}
-                          className="pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">ถึงวันที่</Label>
-                    <Popover open={datePickerOpen.to} onOpenChange={(open) => setDatePickerOpen(prev => ({ ...prev, to: open }))}>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal">
-                          <CalendarIcon className="mr-2 h-3 w-3" />
-                          <span className="text-xs">
-                            {filters.dateTo ? formatDate(filters.dateTo) : "เลือกวันที่"}
-                          </span>
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <div className="p-3 border-b bg-muted/50">
-                          <div className="text-sm font-medium">เลือกวันสิ้นสุด</div>
-                          <div className="text-xs text-muted-foreground">
-                            {filters.dateFrom && `เริ่มจาก ${formatDate(filters.dateFrom)}`}
-                          </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {selectedStartDate 
+                            ? `วันเริ่มต้น: ${formatDate(selectedStartDate.toISOString())}`
+                            : 'เลือกวันที่ในปฏิทินด้านล่าง'
+                          }
                         </div>
-                        <Calendar
-                          mode="single"
-                          selected={filters.dateTo ? new Date(filters.dateTo) : undefined}
-                          onSelect={(date) => {
-                            handleDateSelect(date, 'to');
-                            // Auto switch to custom mode when user manually selects dates
-                            if (date) {
-                              setIsCustomDateMode(true);
-                            }
-                          }}
-                          className="pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                        {tempDateRange.from && tempDateRange.to && (
+                          <div className="text-xs text-blue-600 mt-1 font-medium">
+                            ช่วงที่เลือก: {formatDate(tempDateRange.from.toISOString())} - {formatDate(tempDateRange.to.toISOString())}
+                          </div>
+                        )}
+                      </div>
+                      <Calendar
+                        mode="single"
+                        selected={selectedStartDate}
+                        onSelect={handleCalendarDateSelect}
+                        className="pointer-events-auto"
+                        modifiers={{
+                          selected: selectedStartDate ? [selectedStartDate] : [],
+                          range_start: tempDateRange.from ? [tempDateRange.from] : [],
+                          range_end: tempDateRange.to ? [tempDateRange.to] : [],
+                          range_middle: tempDateRange.from && tempDateRange.to ? 
+                            Array.from({ length: Math.abs(tempDateRange.to.getTime() - tempDateRange.from.getTime()) / (1000 * 60 * 60 * 24) }, (_, i) => {
+                              const date = new Date(tempDateRange.from!);
+                              date.setDate(date.getDate() + i + 1);
+                              return date;
+                            }).filter(date => date < tempDateRange.to!) : []
+                        }}
+                        modifiersStyles={{
+                          selected: { backgroundColor: '#f97316', color: 'white' },
+                          range_start: { backgroundColor: '#f97316', color: 'white' },
+                          range_end: { backgroundColor: '#f97316', color: 'white' },
+                          range_middle: { backgroundColor: '#fed7aa', color: '#9a3412' }
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               )}
             </Card>

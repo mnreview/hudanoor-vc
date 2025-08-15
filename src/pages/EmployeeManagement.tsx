@@ -189,7 +189,7 @@ export function EmployeeManagement() {
   const addBranchCommission = () => {
     setFormData({
       ...formData,
-      branchCommissions: [...formData.branchCommissions, { branchOrPlatform: "", commissionRate: 0 }]
+      branchCommissions: [...formData.branchCommissions, { channel: "store", branchOrPlatform: "", commissionRate: 0 }]
     });
   };
 
@@ -201,6 +201,12 @@ export function EmployeeManagement() {
   const updateBranchCommission = (index: number, field: keyof BranchCommission, value: string | number) => {
     const newCommissions = [...formData.branchCommissions];
     newCommissions[index] = { ...newCommissions[index], [field]: value };
+    
+    // ถ้าเปลี่ยนช่องทาง ให้รีเซ็ตสาขา/แพลตฟอร์ม
+    if (field === 'channel') {
+      newCommissions[index].branchOrPlatform = '';
+    }
+    
     setFormData({ ...formData, branchCommissions: newCommissions });
   };
 
@@ -321,7 +327,7 @@ export function EmployeeManagement() {
                     เพิ่มสาขา
                   </Button>
                 </div>
-                
+
                 {formData.branchCommissions.length === 0 ? (
                   <div className="text-center py-4 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
                     ยังไม่มีการตั้งค่าคอมมิชชั่น คลิก "เพิ่มสาขา" เพื่อเริ่มต้น
@@ -569,7 +575,7 @@ export function EmployeeManagement() {
                     </div>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="pt-0">
                   {/* Salary and Commission Highlight Section */}
                   <div className="space-y-4 mb-6">
@@ -601,7 +607,7 @@ export function EmployeeManagement() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {Array.isArray(employee.branchCommissions) && employee.branchCommissions.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {employee.branchCommissions.map((commission, index) => (

@@ -18,7 +18,11 @@ export interface AppSettings {
 
   // ตัวเลือกสำหรับฟิลด์ต่างๆ
   channels: string[]; // ช่องทางขาย
-  branches: string[]; // สาขา/แพลตฟอร์ม
+  branches: string[]; // สาขา/แพลตฟอร์ม (deprecated - ใช้ branchesByChannel แทน)
+  branchesByChannel: {
+    store: string[]; // สาขาหน้าร้าน
+    online: string[]; // แพลตฟอร์มออนไลน์
+  };
   productCategories: string[]; // หมวดหมู่สินค้า
   expenseCategories: string[]; // หมวดหมู่รายจ่าย
 

@@ -38,6 +38,8 @@ export function AppSettings() {
   // State สำหรับการเพิ่มตัวเลือกใหม่
   const [newChannel, setNewChannel] = useState('');
   const [newBranch, setNewBranch] = useState('');
+  const [newStoreBranch, setNewStoreBranch] = useState('');
+  const [newOnlinePlatform, setNewOnlinePlatform] = useState('');
   const [newProductCategory, setNewProductCategory] = useState('');
   const [newExpenseCategory, setNewExpenseCategory] = useState('');
 
@@ -87,6 +89,66 @@ export function AppSettings() {
     };
     setLocalSettings(updatedSettings);
     saveSettings(updatedSettings); // บันทึกทันทีเมื่อลบสาขา
+  };
+
+  // ฟังก์ชันสำหรับจัดการสาขาหน้าร้าน
+  const addStoreBranch = () => {
+    if (newStoreBranch.trim() && !localSettings.branchesByChannel?.store?.includes(newStoreBranch.trim())) {
+      const updatedSettings = {
+        ...localSettings,
+        branchesByChannel: {
+          ...localSettings.branchesByChannel,
+          store: [...(localSettings.branchesByChannel?.store || []), newStoreBranch.trim()],
+          online: localSettings.branchesByChannel?.online || []
+        }
+      };
+      setLocalSettings(updatedSettings);
+      saveSettings(updatedSettings);
+      setNewStoreBranch('');
+    }
+  };
+
+  const removeStoreBranch = (branch: string) => {
+    const updatedSettings = {
+      ...localSettings,
+      branchesByChannel: {
+        ...localSettings.branchesByChannel,
+        store: localSettings.branchesByChannel?.store?.filter(b => b !== branch) || [],
+        online: localSettings.branchesByChannel?.online || []
+      }
+    };
+    setLocalSettings(updatedSettings);
+    saveSettings(updatedSettings);
+  };
+
+  // ฟังก์ชันสำหรับจัดการแพลตฟอร์มออนไลน์
+  const addOnlinePlatform = () => {
+    if (newOnlinePlatform.trim() && !localSettings.branchesByChannel?.online?.includes(newOnlinePlatform.trim())) {
+      const updatedSettings = {
+        ...localSettings,
+        branchesByChannel: {
+          ...localSettings.branchesByChannel,
+          store: localSettings.branchesByChannel?.store || [],
+          online: [...(localSettings.branchesByChannel?.online || []), newOnlinePlatform.trim()]
+        }
+      };
+      setLocalSettings(updatedSettings);
+      saveSettings(updatedSettings);
+      setNewOnlinePlatform('');
+    }
+  };
+
+  const removeOnlinePlatform = (platform: string) => {
+    const updatedSettings = {
+      ...localSettings,
+      branchesByChannel: {
+        ...localSettings.branchesByChannel,
+        store: localSettings.branchesByChannel?.store || [],
+        online: localSettings.branchesByChannel?.online?.filter(p => p !== platform) || []
+      }
+    };
+    setLocalSettings(updatedSettings);
+    saveSettings(updatedSettings);
   };
 
   const addProductCategory = () => {
@@ -228,37 +290,78 @@ export function AppSettings() {
               </CardContent>
             </Card>
 
-            {/* สาขา/แพลตฟอร์ม */}
+            {/* สาขาหน้าร้าน */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <List className="h-5 w-5" />
-                  สาขา/แพลตฟอร์ม
+                  <Building className="h-5 w-5" />
+                  สาขาหน้าร้าน
                 </CardTitle>
                 <CardDescription>
-                  จัดการตัวเลือกสาขาและแพลตฟอร์ม
+                  จัดการสาขาหน้าร้านต่างๆ
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="เพิ่มสาขา/แพลตฟอร์มใหม่"
-                    value={newBranch}
-                    onChange={(e) => setNewBranch(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addBranch()}
+                    placeholder="เพิ่มสาขาหน้าร้านใหม่"
+                    value={newStoreBranch}
+                    onChange={(e) => setNewStoreBranch(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addStoreBranch()}
                   />
-                  <Button onClick={addBranch} size="sm">
+                  <Button onClick={addStoreBranch} size="sm">
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  {localSettings.branches?.map((branch, index) => (
+                  {localSettings.branchesByChannel?.store?.map((branch, index) => (
                     <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
                       <span>{branch}</span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeBranch(branch)}
+                        onClick={() => removeStoreBranch(branch)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* แพลตฟอร์มออนไลน์ */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  แพลตฟอร์มออนไลน์
+                </CardTitle>
+                <CardDescription>
+                  จัดการแพลตฟอร์มขายออนไลน์ต่างๆ
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="เพิ่มแพลตฟอร์มออนไลน์ใหม่"
+                    value={newOnlinePlatform}
+                    onChange={(e) => setNewOnlinePlatform(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addOnlinePlatform()}
+                  />
+                  <Button onClick={addOnlinePlatform} size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {localSettings.branchesByChannel?.online?.map((platform, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
+                      <span>{platform}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeOnlinePlatform(platform)}
                         className="text-red-500 hover:text-red-700"
                       >
                         <X className="h-4 w-4" />

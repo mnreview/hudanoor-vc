@@ -210,7 +210,7 @@ export function AddRecordForm({ onSubmit, isSubmitting = false }: AddRecordFormP
                     <SelectValue placeholder="เลือกสาขา/แพลตฟอร์ม" />
                   </SelectTrigger>
                   <SelectContent>
-                    {(settings.branches || ['สาขาหลัก']).map(branch => (
+                    {(settings.branches || ['สาขาหลัก']).map((branch: string) => (
                       <SelectItem key={branch} value={branch}>
                         {branch}
                       </SelectItem>
@@ -324,7 +324,7 @@ export function AddRecordForm({ onSubmit, isSubmitting = false }: AddRecordFormP
                     <SelectValue placeholder="เลือกสาขา/แพลตฟอร์ม" />
                   </SelectTrigger>
                   <SelectContent>
-                    {(settings.branches || ['สาขาหลัก']).map(branch => (
+                    {(settings.branches || ['สาขาหลัก']).map((branch: string) => (
                       <SelectItem key={branch} value={branch}>
                         {branch}
                       </SelectItem>

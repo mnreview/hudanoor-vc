@@ -1,4 +1,5 @@
 export interface BranchCommission {
+  channel: 'store' | 'online';
   branchOrPlatform: string;
   commissionRate: number;
 }

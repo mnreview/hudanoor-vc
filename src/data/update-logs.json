@@ -1,5 +1,85 @@
 [
     {
+        "id": "log_1755155900000",
+        "version": "1.8.8",
+        "type": "bugfix",
+        "title": "แก้ไข TypeScript type annotation ในฟอร์มบันทึกรายรับ-รายจ่าย",
+        "description": "แก้ไขปัญหา TypeScript hint เกี่ยวกับ implicit 'any' type ในการ map รายการสาขา/แพลตฟอร์ม โดยเพิ่ม explicit type annotation (branch: string) ทำให้โค้ดมีความชัดเจนและปลอดภัยมากขึ้น",
+        "changes": [
+            "เพิ่ม explicit type annotation (branch: string) ในการ map รายการสาขา/แพลตฟอร์ม",
+            "แก้ไข TypeScript hint เกี่ยวกับ implicit 'any' type",
+            "ปรับปรุงความปลอดภัยของ type checking ในฟอร์ม"
+        ],
+        "technical_details": "เพิ่ม type annotation (branch: string) ใน map function ของ settings.branches ใน add-record-form.tsx เพื่อแก้ไข TypeScript implicit 'any' type warning",
+        "impact": "ไม่มีผลกระทบต่อการใช้งานของผู้ใช้ แต่ช่วยให้โค้ดมีความปลอดภัยและชัดเจนมากขึ้นในด้าน type checking",
+        "date": "2025-08-15",
+        "time": "15:55:00"
+    },
+    {
+        "id": "log_1755155800000",
+        "version": "1.8.7",
+        "type": "improvement",
+        "title": "เตรียมการแยกจัดการสาขาหน้าร้านและแพลตฟอร์มออนไลน์ในหน้าการตั้งค่า",
+        "description": "เพิ่มตัวแปรสำหรับจัดการสาขาหน้าร้านและแพลตฟอร์มออนไลน์แยกกันในหน้าการตั้งค่า เพื่อรองรับระบบคอมมิชชั่นแบบยืดหยุ่นที่สามารถกำหนดค่าคอมมิชชั่นแยกตามช่องทางขายได้",
+        "changes": [
+            "เพิ่มตัวแปร newStoreBranch สำหรับจัดการสาขาหน้าร้าน",
+            "เพิ่มตัวแปร newOnlinePlatform สำหรับจัดการแพลตฟอร์มออนไลน์",
+            "เตรียมพื้นฐานสำหรับ UI ที่ให้ผู้ใช้จัดการสาขาและแพลตฟอร์มแยกกัน"
+        ],
+        "technical_details": "เพิ่ม useState hooks สำหรับ newStoreBranch และ newOnlinePlatform ใน AppSettings.tsx เพื่อรองรับการจัดการสาขาและแพลตฟอร์มแยกตามช่องทางขาย",
+        "impact": "เตรียมพื้นฐานสำหรับฟีเจอร์การจัดการสาขาหน้าร้านและแพลตฟอร์มออนไลน์แยกกัน ซึ่งจะทำให้การตั้งค่าคอมมิชชั่นพนักงานมีความยืดหยุ่นและแม่นยำมากขึ้น",
+        "date": "2025-08-15",
+        "time": "15:50:00"
+    },
+    {
+        "id": "log_1755155700000",
+        "version": "1.8.6",
+        "type": "bugfix",
+        "title": "แก้ไขการเพิ่มค่าคอมมิชชั่นใหม่ในฟอร์มพนักงาน",
+        "description": "แก้ไขปัญหาการเพิ่มค่าคอมมิชชั่นใหม่ในฟอร์มจัดการพนักงานให้รวมฟิลด์ channel ที่จำเป็น ตอนนี้เมื่อคลิก 'เพิ่มสาขา' จะตั้งค่าช่องทางเป็น 'หน้าร้าน' โดยอัตโนมัติ ทำให้ข้อมูลสมบูรณ์และสอดคล้องกับโครงสร้างข้อมูลที่กำหนด",
+        "changes": [
+            "เพิ่มฟิลด์ channel: 'store' เป็นค่าเริ่มต้นเมื่อเพิ่มค่าคอมมิชชั่นใหม่",
+            "แก้ไข TypeScript errors ที่เกิดจากการขาดฟิลด์ channel ที่จำเป็น",
+            "ทำให้การเพิ่มค่าคอมมิชชั่นทำงานได้ถูกต้องตามโครงสร้าง BranchCommission interface"
+        ],
+        "technical_details": "เพิ่ม channel: 'store' ใน default object เมื่อเรียก addBranchCommission() ใน EmployeeManagement.tsx",
+        "impact": "ผู้ใช้สามารถเพิ่มค่าคอมมิชชั่นใหม่ได้โดยไม่เกิด errors และข้อมูลจะมีความสมบูรณ์ตามที่ระบบต้องการ",
+        "date": "2025-08-15",
+        "time": "15:45:00"
+    },
+    {
+        "id": "log_1755155600000",
+        "version": "1.8.5",
+        "type": "improvement",
+        "title": "เพิ่มการแยกช่องทางขายในระบบคอมมิชชั่นพนักงาน",
+        "description": "ปรับปรุงระบบคอมมิชชั่นพนักงานให้สามารถกำหนดช่องทางขาย (หน้าร้าน/ออนไลน์) สำหรับแต่ละสาขา/แพลตฟอร์มได้ ทำให้สามารถตั้งค่าคอมมิชชั่นที่แตกต่างกันสำหรับการขายหน้าร้านและออนไลน์ในสาขาเดียวกันได้",
+        "changes": [
+            "เพิ่มฟิลด์ channel ใน BranchCommission interface เพื่อระบุช่องทางขาย",
+            "รองรับการตั้งค่าคอมมิชชั่นแยกตามช่องทางขายสำหรับแต่ละสาขา/แพลตฟอร์ม",
+            "เตรียมพื้นฐานสำหรับการคำนวณคอมมิชชั่นที่แม่นยำมากขึ้น"
+        ],
+        "technical_details": "เพิ่ม channel: 'store' | 'online' field ใน BranchCommission interface ใน src/types/employee.ts",
+        "impact": "ผู้ใช้จะสามารถตั้งค่าคอมมิชชั่นที่แตกต่างกันสำหรับการขายหน้าร้านและออนไลน์ในสาขาเดียวกันได้ เช่น Lotus Yala หน้าร้าน 2% และ Lotus Yala ออนไลน์ 2.5%",
+        "date": "2025-08-15",
+        "time": "15:40:00"
+    },
+    {
+        "id": "log_1755155500000",
+        "version": "1.8.4",
+        "type": "bugfix",
+        "title": "แก้ไขการ import Select components ในหน้าจัดการพนักงาน",
+        "description": "แก้ไขปัญหาการ import Select UI components ที่ขาดหายไปในหน้าจัดการพนักงาน ทำให้ dropdown สำหรับเลือกสาขา/แพลตฟอร์มในฟอร์มเพิ่ม/แก้ไขพนักงานทำงานได้ถูกต้อง",
+        "changes": [
+            "เพิ่ม import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } จาก @/components/ui/select",
+            "แก้ไข TypeScript errors ที่เกิดจากการใช้ Select components โดยไม่ได้ import",
+            "ฟอร์มเพิ่ม/แก้ไขพนักงานสามารถใช้งาน dropdown เลือกสาขา/แพลตฟอร์มได้ปกติ"
+        ],
+        "technical_details": "เพิ่ม import statement สำหรับ Select UI components ใน src/pages/EmployeeManagement.tsx เพื่อแก้ไข TypeScript compilation errors",
+        "impact": "ฟอร์มจัดการพนักงานจะทำงานได้ถูกต้องโดยไม่มี TypeScript errors และ dropdown สำหรับเลือกสาขา/แพลตฟอร์มจะแสดงผลได้ปกติ",
+        "date": "2025-08-15",
+        "time": "15:35:00"
+    },
+    {
         "id": "log_1755155400000",
         "version": "1.8.3",
         "type": "improvement",

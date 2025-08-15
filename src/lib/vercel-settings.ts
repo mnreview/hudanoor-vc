@@ -40,7 +40,11 @@ const defaultSettings = {
   defaultSalesTarget: 200000,
   monthlyTarget: 200000,
   channels: ["หน้าร้าน", "ออนไลน์"],
-  branches: ["สาขาหลัก"],
+  branches: ["สาขาหลัก"], // เก็บไว้เพื่อ backward compatibility
+  branchesByChannel: {
+    store: ["สาขาหลัก"],
+    online: ["Shopee", "Lazada", "Facebook"]
+  },
   productCategories: ["เสื้อผ้า", "อุปกรณ์", "อื่นๆ"],
   expenseCategories: ["ค่าเช่า", "ค่าไฟ", "วัตถุดิบ", "อื่นๆ"]
 };

@@ -70,10 +70,10 @@ export default async function handler(req, res) {
         employee.email || '',
         employee.phone || '',
         employee.hireDate || new Date().toISOString().split('T')[0],
-        employee.salary || 0,
+        parseFloat(employee.salary) || 0, // Ensure salary is stored as number
         employee.status || 'active',
-        employee.storeCommission || 0,
-        employee.onlineCommission || 0
+        parseFloat(employee.storeCommission) || 0, // Ensure commission is stored as number
+        parseFloat(employee.onlineCommission) || 0 // Ensure commission is stored as number
       ];
 
       try {
@@ -130,15 +130,15 @@ export default async function handler(req, res) {
         const currentRow = dataRows[employeeRowIndex];
         const updatedRow = [...currentRow];
         
-        // Map updates to column positions
+        // Map updates to column positions with proper type conversion
         if (updates.name !== undefined) updatedRow[1] = updates.name;
         if (updates.position !== undefined) updatedRow[2] = updates.position;
         if (updates.email !== undefined) updatedRow[3] = updates.email;
         if (updates.phone !== undefined) updatedRow[4] = updates.phone;
-        if (updates.salary !== undefined) updatedRow[6] = updates.salary;
+        if (updates.salary !== undefined) updatedRow[6] = parseFloat(updates.salary) || 0;
         if (updates.status !== undefined) updatedRow[7] = updates.status;
-        if (updates.storeCommission !== undefined) updatedRow[8] = updates.storeCommission;
-        if (updates.onlineCommission !== undefined) updatedRow[9] = updates.onlineCommission;
+        if (updates.storeCommission !== undefined) updatedRow[8] = parseFloat(updates.storeCommission) || 0;
+        if (updates.onlineCommission !== undefined) updatedRow[9] = parseFloat(updates.onlineCommission) || 0;
 
         // Update the specific row
         const updateRange = `${sheetName}!A${employeeRowIndex + 2}:J${employeeRowIndex + 2}`;

@@ -9,21 +9,39 @@ const API_BASE = typeof window !== 'undefined'
 const parseEmployeeData = (rows: any[][]): Employee[] => {
   if (!rows || rows.length <= 1) return [];
   
-  // Skip header row
-  return rows.slice(1).filter(row => row[0] && row[0].trim() !== '').map((row, index) => ({
-    id: row[0] || `emp_${index + 1}`,
-    name: row[1] || '',
-    position: row[2] || '',
-    email: row[3] || '',
-    phone: row[4] || '',
-    startDate: row[5] || new Date().toISOString().split('T')[0],
-    salary: parseFloat(row[6]) || 0,
-    isActive: row[7] === 'active',
-    storeCommission: parseFloat(row[8]) || 0,
-    onlineCommission: parseFloat(row[9]) || 0,
-    createdAt: row[5] || new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
+  // Skip header row and filter out empty rows
+  return rows.slice(1).filter(row => row[0] && row[0].trim() !== '').map((row, index) => {
+    // Parse salary with proper number conversion
+    const salaryValue = row[6];
+    const parsedSalary = typeof salaryValue === 'string' ? 
+      parseFloat(salaryValue.replace(/,/g, '')) : // Remove commas if present
+      parseFloat(salaryValue) || 0;
+    
+    // Parse commission values
+    const storeCommissionValue = row[8];
+    const onlineCommissionValue = row[9];
+    const parsedStoreCommission = typeof storeCommissionValue === 'string' ? 
+      parseFloat(storeCommissionValue.replace(/,/g, '')) : 
+      parseFloat(storeCommissionValue) || 0;
+    const parsedOnlineCommission = typeof onlineCommissionValue === 'string' ? 
+      parseFloat(onlineCommissionValue.replace(/,/g, '')) : 
+      parseFloat(onlineCommissionValue) || 0;
+    
+    return {
+      id: row[0] || `emp_${index + 1}`,
+      name: row[1] || '',
+      position: row[2] || '',
+      email: row[3] || '',
+      phone: row[4] || '',
+      startDate: row[5] || new Date().toISOString().split('T')[0],
+      salary: parsedSalary,
+      isActive: row[7] === 'active',
+      storeCommission: parsedStoreCommission,
+      onlineCommission: parsedOnlineCommission,
+      createdAt: row[5] || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  });
 };
 
 // Read employees data from Google Sheets via Vercel API

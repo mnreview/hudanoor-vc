@@ -10,7 +10,7 @@ const parseEmployeeData = (rows: any[][]): Employee[] => {
   if (!rows || rows.length <= 1) return [];
   
   // Skip header row
-  return rows.slice(1).map((row, index) => ({
+  return rows.slice(1).filter(row => row[0] && row[0].trim() !== '').map((row, index) => ({
     id: row[0] || `emp_${index + 1}`,
     name: row[1] || '',
     position: row[2] || '',
@@ -19,8 +19,8 @@ const parseEmployeeData = (rows: any[][]): Employee[] => {
     startDate: row[5] || new Date().toISOString().split('T')[0],
     salary: parseFloat(row[6]) || 0,
     isActive: row[7] === 'active',
-    storeCommission: 2.5, // Default values
-    onlineCommission: 3.0,
+    storeCommission: parseFloat(row[8]) || 0,
+    onlineCommission: parseFloat(row[9]) || 0,
     createdAt: row[5] || new Date().toISOString(),
     updatedAt: new Date().toISOString()
   }));
@@ -54,7 +54,9 @@ export const addEmployeeRecord = async (employee: Omit<Employee, 'id' | 'created
       phone: employee.phone || '',
       hireDate: employee.startDate,
       salary: employee.salary,
-      status: employee.isActive ? 'active' : 'inactive'
+      status: employee.isActive ? 'active' : 'inactive',
+      storeCommission: employee.storeCommission || 0,
+      onlineCommission: employee.onlineCommission || 0
     };
 
     const response = await fetch(`${API_BASE}/employees`, {
@@ -88,6 +90,8 @@ export const updateEmployeeRecord = async (employeeId: string, updates: Partial<
     if (updates.phone !== undefined) updateData.phone = updates.phone;
     if (updates.salary !== undefined) updateData.salary = updates.salary;
     if (updates.isActive !== undefined) updateData.status = updates.isActive ? 'active' : 'inactive';
+    if (updates.storeCommission !== undefined) updateData.storeCommission = updates.storeCommission;
+    if (updates.onlineCommission !== undefined) updateData.onlineCommission = updates.onlineCommission;
 
     const response = await fetch(`${API_BASE}/employees`, {
       method: 'PUT',

@@ -159,7 +159,7 @@ export function DashboardFilters({
     }
   };
 
-  // Handle custom date selection with auto-close
+  // Handle custom date selection with auto-close and auto-switch to custom mode
   const handleDateSelect = (date: Date | undefined, type: 'from' | 'to') => {
     if (date) {
       const newFilters = { ...filters };
@@ -172,6 +172,9 @@ export function DashboardFilters({
 
       // Close the date picker
       setDatePickerOpen(prev => ({ ...prev, [type]: false }));
+      
+      // Auto switch to custom mode when user manually selects dates
+      setIsCustomDateMode(true);
     }
   };
 
@@ -251,6 +254,20 @@ export function DashboardFilters({
                 </SelectContent>
               </Select>
 
+              {/* Date Range Display and Calendar */}
+              {getDateRangeLabel(filters) && (
+                <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded-md border border-blue-200 dark:border-blue-700">
+                  <div className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
+                    ช่วงที่เลือก: {getDateRangeLabel(filters)}
+                  </div>
+                  <div className="text-xs text-blue-600 dark:text-blue-400">
+                    {filters.dateFrom && filters.dateTo && (
+                      <>จาก {formatDate(filters.dateFrom)} ถึง {formatDate(filters.dateTo)}</>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Custom Date Range */}
               {(getDateRangePreset(filters) === 'custom' || isCustomDateMode) && (
                 <div className="mt-2 space-y-2">
@@ -266,10 +283,22 @@ export function DashboardFilters({
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
+                        <div className="p-3 border-b bg-muted/50">
+                          <div className="text-sm font-medium">เลือกวันเริ่มต้น</div>
+                          <div className="text-xs text-muted-foreground">
+                            {filters.dateTo && `จะเลือกถึง ${formatDate(filters.dateTo)}`}
+                          </div>
+                        </div>
                         <Calendar
                           mode="single"
                           selected={filters.dateFrom ? new Date(filters.dateFrom) : undefined}
-                          onSelect={(date) => handleDateSelect(date, 'from')}
+                          onSelect={(date) => {
+                            handleDateSelect(date, 'from');
+                            // Auto switch to custom mode when user manually selects dates
+                            if (date) {
+                              setIsCustomDateMode(true);
+                            }
+                          }}
                           className="pointer-events-auto"
                         />
                       </PopoverContent>
@@ -287,10 +316,22 @@ export function DashboardFilters({
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
+                        <div className="p-3 border-b bg-muted/50">
+                          <div className="text-sm font-medium">เลือกวันสิ้นสุด</div>
+                          <div className="text-xs text-muted-foreground">
+                            {filters.dateFrom && `เริ่มจาก ${formatDate(filters.dateFrom)}`}
+                          </div>
+                        </div>
                         <Calendar
                           mode="single"
                           selected={filters.dateTo ? new Date(filters.dateTo) : undefined}
-                          onSelect={(date) => handleDateSelect(date, 'to')}
+                          onSelect={(date) => {
+                            handleDateSelect(date, 'to');
+                            // Auto switch to custom mode when user manually selects dates
+                            if (date) {
+                              setIsCustomDateMode(true);
+                            }
+                          }}
                           className="pointer-events-auto"
                         />
                       </PopoverContent>

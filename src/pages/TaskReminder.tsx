@@ -427,8 +427,8 @@ export function TaskReminder() {
         </div>
       </div>
 
-      {/* Tasks List */}
-      <div className="space-y-4">
+      {/* Tasks List - Separated by Status */}
+      <div className="space-y-6">
         {isLoading ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
@@ -453,82 +453,175 @@ export function TaskReminder() {
             </CardContent>
           </Card>
         ) : (
-          sortedTasks.map((task) => {
-            const status = getTaskStatus(task);
-            return (
-              <Card key={task.id} className={cn(
-                "transition-all duration-200",
-                task.completed ? "opacity-60" : "hover:shadow-md"
-              )}>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    <Checkbox
-                      checked={task.completed}
-                      onCheckedChange={() => handleToggleComplete(task.id)}
-                      disabled={isUpdatingTask}
-                      className="mt-1"
-                    />
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className={cn(
-                            "font-semibold",
-                            task.completed && "line-through text-muted-foreground"
-                          )}>
-                            {task.title}
-                          </h3>
-                          <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            <Badge variant={task.type === 'income' ? 'default' : 'secondary'}>
-                              {task.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
-                            </Badge>
-                            <span className="text-sm font-medium">
-                              {task.amount.toLocaleString()} บาท
-                            </span>
-                            <Badge variant="outline" className="text-xs">
-                              {task.channel === 'store' ? 'หน้าร้าน' : 'ออนไลน์'}
-                            </Badge>
-                            {task.branchOrPlatform && (
-                              <Badge variant="outline" className="text-xs">
-                                {task.branchOrPlatform}
-                              </Badge>
-                            )}
-                          </div>
-                          {(task.productCategory || task.expenseCategory) && (
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs text-muted-foreground">
-                                หมวดหมู่: {task.type === 'income' ? task.productCategory : task.expenseCategory}
-                              </span>
+          <>
+            {/* Pending Tasks Section */}
+            {sortedTasks.filter(task => !task.completed).length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                  <h2 className="text-lg font-semibold text-orange-700 dark:text-orange-400">
+                    รอทำ ({sortedTasks.filter(task => !task.completed).length})
+                  </h2>
+                </div>
+                <div className="space-y-3">
+                  {sortedTasks.filter(task => !task.completed).map((task) => {
+                    const status = getTaskStatus(task);
+                    return (
+                      <Card key={task.id} className="transition-all duration-200 hover:shadow-md border-l-4 border-l-orange-500">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-4">
+                            <Checkbox
+                              checked={task.completed}
+                              onCheckedChange={() => handleToggleComplete(task.id)}
+                              disabled={isUpdatingTask}
+                              className="mt-1"
+                            />
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1">
+                                  <h3 className="font-semibold">
+                                    {task.title}
+                                  </h3>
+                                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                    <Badge variant={task.type === 'income' ? 'default' : 'secondary'}>
+                                      {task.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
+                                    </Badge>
+                                    <span className="text-sm font-medium">
+                                      {task.amount.toLocaleString()} บาท
+                                    </span>
+                                    <Badge variant="outline" className="text-xs">
+                                      {task.channel === 'store' ? 'หน้าร้าน' : 'ออนไลน์'}
+                                    </Badge>
+                                    {task.branchOrPlatform && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {task.branchOrPlatform}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  {(task.productCategory || task.expenseCategory) && (
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <span className="text-xs text-muted-foreground">
+                                        หมวดหมู่: {task.type === 'income' ? task.productCategory : task.expenseCategory}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {task.note && (
+                                    <p className="text-sm text-muted-foreground mt-2">
+                                      {task.note}
+                                    </p>
+                                  )}
+                                </div>
+                                
+                                <div className="flex flex-col items-end gap-2">
+                                  <Badge className={status.color}>
+                                    {status.label}
+                                  </Badge>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteTask(task.id)}
+                                    disabled={isDeletingTask}
+                                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  >
+                                    {isDeletingTask ? 'กำลังลบ...' : 'ลบ'}
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
-                          )}
-                          {task.note && (
-                            <p className="text-sm text-muted-foreground mt-2">
-                              {task.note}
-                            </p>
-                          )}
-                        </div>
-                        
-                        <div className="flex flex-col items-end gap-2">
-                          <Badge className={status.color}>
-                            {status.label}
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteTask(task.id)}
-                            disabled={isDeletingTask}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          >
-                            {isDeletingTask ? 'กำลังลบ...' : 'ลบ'}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Completed Tasks Section */}
+            {sortedTasks.filter(task => task.completed).length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <h2 className="text-lg font-semibold text-green-700 dark:text-green-400">
+                    เรียบร้อยแล้ว ({sortedTasks.filter(task => task.completed).length})
+                  </h2>
+                </div>
+                <div className="space-y-3">
+                  {sortedTasks.filter(task => task.completed).map((task) => {
+                    const status = getTaskStatus(task);
+                    return (
+                      <Card key={task.id} className="transition-all duration-200 opacity-75 hover:opacity-90 border-l-4 border-l-green-500">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-4">
+                            <Checkbox
+                              checked={task.completed}
+                              onCheckedChange={() => handleToggleComplete(task.id)}
+                              disabled={isUpdatingTask}
+                              className="mt-1"
+                            />
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1">
+                                  <h3 className="font-semibold line-through text-muted-foreground">
+                                    {task.title}
+                                  </h3>
+                                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                    <Badge variant={task.type === 'income' ? 'default' : 'secondary'} className="opacity-75">
+                                      {task.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
+                                    </Badge>
+                                    <span className="text-sm font-medium text-muted-foreground">
+                                      {task.amount.toLocaleString()} บาท
+                                    </span>
+                                    <Badge variant="outline" className="text-xs opacity-75">
+                                      {task.channel === 'store' ? 'หน้าร้าน' : 'ออนไลน์'}
+                                    </Badge>
+                                    {task.branchOrPlatform && (
+                                      <Badge variant="outline" className="text-xs opacity-75">
+                                        {task.branchOrPlatform}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  {(task.productCategory || task.expenseCategory) && (
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <span className="text-xs text-muted-foreground opacity-75">
+                                        หมวดหมู่: {task.type === 'income' ? task.productCategory : task.expenseCategory}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {task.note && (
+                                    <p className="text-sm text-muted-foreground mt-2 opacity-75">
+                                      {task.note}
+                                    </p>
+                                  )}
+                                </div>
+                                
+                                <div className="flex flex-col items-end gap-2">
+                                  <Badge className={`${status.color} opacity-75`}>
+                                    {status.label}
+                                  </Badge>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteTask(task.id)}
+                                    disabled={isDeletingTask}
+                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 opacity-75"
+                                  >
+                                    {isDeletingTask ? 'กำลังลบ...' : 'ลบ'}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 

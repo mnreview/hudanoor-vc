@@ -473,8 +473,8 @@ export function AppSettings() {
                     <button
                       key={color.value}
                       className={`w-12 h-12 rounded-lg border-2 ${localSettings.primaryColor === color.value
-                          ? 'border-gray-900 dark:border-white'
-                          : 'border-gray-200 dark:border-gray-700'
+                        ? 'border-gray-900 dark:border-white'
+                        : 'border-gray-200 dark:border-gray-700'
                         }`}
                       style={{ backgroundColor: color.value }}
                       onClick={() => setLocalSettings({ ...localSettings, primaryColor: color.value })}

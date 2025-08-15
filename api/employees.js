@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     }
 
     const sheetName = 'Employees';
-    const range = `${sheetName}!A:H`;
+    const range = `${sheetName}!A:J`; // Extended to include commission columns
 
     // Handle GET request (read employees)
     if (req.method === 'GET') {
@@ -45,8 +45,8 @@ export default async function handler(req, res) {
       } catch (error) {
         if (error.message.includes('Unable to parse range')) {
           return res.status(200).json({ 
-            data: [['ID', 'Name', 'Position', 'Email', 'Phone', 'HireDate', 'Salary', 'Status']],
-            range: `${sheetName}!A1:H1`,
+            data: [['ID', 'Name', 'Position', 'Email', 'Phone', 'HireDate', 'Salary', 'Status', 'StoreCommission', 'OnlineCommission']],
+            range: `${sheetName}!A1:J1`,
             message: 'Employees sheet not found, returning headers only'
           });
         }
@@ -71,7 +71,9 @@ export default async function handler(req, res) {
         employee.phone || '',
         employee.hireDate || new Date().toISOString().split('T')[0],
         employee.salary || 0,
-        employee.status || 'active'
+        employee.status || 'active',
+        employee.storeCommission || 0,
+        employee.onlineCommission || 0
       ];
 
       try {
@@ -106,12 +108,59 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Employee ID and updates are required' });
       }
 
-      // For now, return success (full update implementation would require finding the row)
-      return res.status(200).json({ 
-        success: true,
-        message: 'Employee update functionality simplified',
-        employeeId
-      });
+      try {
+        // Get all data to find the row to update
+        const response = await sheets.spreadsheets.values.get({
+          spreadsheetId,
+          range,
+        });
+
+        const rows = response.data.values || [];
+        const headerRow = rows[0] || [];
+        const dataRows = rows.slice(1);
+        
+        // Find the employee row
+        const employeeRowIndex = dataRows.findIndex(row => row[0] === employeeId);
+        
+        if (employeeRowIndex === -1) {
+          return res.status(404).json({ error: 'Employee not found' });
+        }
+
+        // Update the row data
+        const currentRow = dataRows[employeeRowIndex];
+        const updatedRow = [...currentRow];
+        
+        // Map updates to column positions
+        if (updates.name !== undefined) updatedRow[1] = updates.name;
+        if (updates.position !== undefined) updatedRow[2] = updates.position;
+        if (updates.email !== undefined) updatedRow[3] = updates.email;
+        if (updates.phone !== undefined) updatedRow[4] = updates.phone;
+        if (updates.salary !== undefined) updatedRow[6] = updates.salary;
+        if (updates.status !== undefined) updatedRow[7] = updates.status;
+        if (updates.storeCommission !== undefined) updatedRow[8] = updates.storeCommission;
+        if (updates.onlineCommission !== undefined) updatedRow[9] = updates.onlineCommission;
+
+        // Update the specific row
+        const updateRange = `${sheetName}!A${employeeRowIndex + 2}:J${employeeRowIndex + 2}`;
+        await sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range: updateRange,
+          valueInputOption: 'USER_ENTERED',
+          resource: { values: [updatedRow] },
+        });
+
+        return res.status(200).json({ 
+          success: true,
+          employeeId,
+          message: 'Employee updated successfully'
+        });
+      } catch (error) {
+        console.error('Update error:', error);
+        return res.status(500).json({ 
+          error: 'Failed to update employee',
+          details: error.message 
+        });
+      }
     }
 
     // Handle DELETE request (delete employee)
@@ -122,12 +171,42 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Employee ID is required' });
       }
 
-      // For now, return success (full delete implementation would require finding the row)
-      return res.status(200).json({ 
-        success: true,
-        message: 'Employee delete functionality simplified',
-        employeeId
-      });
+      try {
+        // Get all data to find the row to delete
+        const response = await sheets.spreadsheets.values.get({
+          spreadsheetId,
+          range,
+        });
+
+        const rows = response.data.values || [];
+        const dataRows = rows.slice(1);
+        
+        // Find the employee row
+        const employeeRowIndex = dataRows.findIndex(row => row[0] === employeeId);
+        
+        if (employeeRowIndex === -1) {
+          return res.status(404).json({ error: 'Employee not found' });
+        }
+
+        // Delete the row (Google Sheets API doesn't have direct row deletion, so we'll clear it)
+        const deleteRange = `${sheetName}!A${employeeRowIndex + 2}:J${employeeRowIndex + 2}`;
+        await sheets.spreadsheets.values.clear({
+          spreadsheetId,
+          range: deleteRange,
+        });
+
+        return res.status(200).json({ 
+          success: true,
+          employeeId,
+          message: 'Employee deleted successfully'
+        });
+      } catch (error) {
+        console.error('Delete error:', error);
+        return res.status(500).json({ 
+          error: 'Failed to delete employee',
+          details: error.message 
+        });
+      }
     }
 
     return res.status(405).json({ error: 'Method not allowed' });

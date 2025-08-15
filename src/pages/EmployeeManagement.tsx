@@ -285,8 +285,8 @@ export function EmployeeManagement() {
                     id="storeCommission"
                     type="number"
                     step="0.1"
-                    value={formData.storeCommission}
-                    onChange={(e) => setFormData({ ...formData, storeCommission: Number(e.target.value) })}
+                    value={formData.storeCommission || ''}
+                    onChange={(e) => setFormData({ ...formData, storeCommission: Number(e.target.value) || 0 })}
                   />
                 </div>
                 <div>
@@ -295,8 +295,8 @@ export function EmployeeManagement() {
                     id="onlineCommission"
                     type="number"
                     step="0.1"
-                    value={formData.onlineCommission}
-                    onChange={(e) => setFormData({ ...formData, onlineCommission: Number(e.target.value) })}
+                    value={formData.onlineCommission || ''}
+                    onChange={(e) => setFormData({ ...formData, onlineCommission: Number(e.target.value) || 0 })}
                   />
                 </div>
               </div>

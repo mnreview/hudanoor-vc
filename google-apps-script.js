@@ -15,13 +15,13 @@ var UPDATE_LOGS_SHEET = 'UpdateLogs';
 
 // Headers สำหรับ Income Sheet
 var INCOME_HEADERS = [
-  'ID', 'วันที่', 'ช่องทาง', 'สาขา/แพลตฟอร์ม', 'ชื่อสินค้า', 
+  'ID', 'วันที่', 'ช่องทาง', 'สาขา/แพลตฟอร์ม', 'ชื่อสินค้า',
   'หมวดหมู่สินค้า', 'จำนวน', 'ยอดเงิน', 'หมายเหตุ', 'สร้างเมื่อ', 'แก้ไขเมื่อ'
 ];
 
 // Headers สำหรับ Expense Sheet
 var EXPENSE_HEADERS = [
-  'ID', 'วันที่', 'ช่องทาง', 'สาขา/แพลตฟอร์ม', 'รายการค่าใช้จ่าย', 
+  'ID', 'วันที่', 'ช่องทาง', 'สาขา/แพลตฟอร์ม', 'รายการค่าใช้จ่าย',
   'หมวดหมู่ค่าใช้จ่าย', 'ยอดเงิน', 'หมายเหตุ', 'สร้างเมื่อ', 'แก้ไขเมื่อ'
 ];
 
@@ -32,13 +32,13 @@ var TASK_HEADERS = [
 
 // Headers สำหรับ Settings Sheet
 var SETTINGS_HEADERS = [
-  'ID', 'ชื่อร้าน', 'ชื่อเว็บไซต์', 'สโลแกน', 'สีหลัก', 'ที่อยู่', 'เบอร์โทร', 'อีเมล', 
+  'ID', 'ชื่อร้าน', 'ชื่อเว็บไซต์', 'สโลแกน', 'สีหลัก', 'ที่อยู่', 'เบอร์โทร', 'อีเมล',
   'สกุลเงิน', 'รูปแบบวันที่', 'เป้าหมายยอดขาย', 'สร้างเมื่อ', 'แก้ไขเมื่อ'
 ];
 
 // Headers สำหรับ Employees Sheet
 var EMPLOYEES_HEADERS = [
-  'ID', 'ชื่อ-นามสกุล', 'ตำแหน่ง', 'เงินเดือน', 'คอมหน้าร้าน%', 'คอมออนไลน์%', 
+  'ID', 'ชื่อ-นามสกุล', 'ตำแหน่ง', 'เงินเดือน', 'คอมหน้าร้าน%', 'คอมออนไลน์%',
   'วันเริ่มงาน', 'เบอร์โทร', 'อีเมล', 'ที่อยู่', 'หมายเหตุ', 'สถานะ', 'สร้างเมื่อ', 'แก้ไขเมื่อ'
 ];
 
@@ -51,7 +51,7 @@ var UPDATE_LOGS_HEADERS = [
 function doGet(e) {
   var action = e.parameter.action;
   var callback = e.parameter.callback;
-  
+
   try {
     var result;
     switch (action) {
@@ -136,7 +136,7 @@ function doGet(e) {
             .setMimeType(ContentService.MimeType.JSON);
         }
     }
-    
+
     return result;
   } catch (error) {
     var errorResult = { error: error.toString() };
@@ -157,7 +157,7 @@ function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     var action = data.action;
-    
+
     var result;
     switch (action) {
       case 'addIncome':
@@ -174,7 +174,7 @@ function doPost(e) {
           .createTextOutput(JSON.stringify({ error: 'Invalid action' }))
           .setMimeType(ContentService.MimeType.JSON);
     }
-    
+
     // เพิ่ม CORS headers
     return result.setHeaders({
       'Access-Control-Allow-Origin': '*',
@@ -210,14 +210,14 @@ function doOptions(e) {
 function getIncomeData(callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(INCOME_SHEET);
-  
+
   if (!sheet) {
     throw new Error('Sheet "' + INCOME_SHEET + '" not found');
   }
-  
+
   var values = sheet.getDataRange().getValues();
   var result = { values: values };
-  
+
   if (callback) {
     // JSONP response
     return ContentService
@@ -235,14 +235,14 @@ function getIncomeData(callback) {
 function getExpenseData(callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(EXPENSE_SHEET);
-  
+
   if (!sheet) {
     throw new Error('Sheet "' + EXPENSE_SHEET + '" not found');
   }
-  
+
   var values = sheet.getDataRange().getValues();
   var result = { values: values };
-  
+
   if (callback) {
     // JSONP response
     return ContentService
@@ -260,14 +260,14 @@ function getExpenseData(callback) {
 function addIncomeRecord(incomeData, callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(INCOME_SHEET);
-  
+
   if (!sheet) {
     throw new Error('Sheet "' + INCOME_SHEET + '" not found');
   }
-  
+
   var id = 'income_' + Date.now();
   var now = new Date().toISOString();
-  
+
   var rowData = [
     id,
     incomeData.date,
@@ -281,11 +281,11 @@ function addIncomeRecord(incomeData, callback) {
     now,
     now
   ];
-  
+
   sheet.appendRow(rowData);
-  
+
   var result = { success: true, id: id };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -301,14 +301,14 @@ function addIncomeRecord(incomeData, callback) {
 function addExpenseRecord(expenseData, callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(EXPENSE_SHEET);
-  
+
   if (!sheet) {
     throw new Error('Sheet "' + EXPENSE_SHEET + '" not found');
   }
-  
+
   var id = 'expense_' + Date.now();
   var now = new Date().toISOString();
-  
+
   var rowData = [
     id,
     expenseData.date,
@@ -321,11 +321,11 @@ function addExpenseRecord(expenseData, callback) {
     now,
     now
   ];
-  
+
   sheet.appendRow(rowData);
-  
+
   var result = { success: true, id: id };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -340,45 +340,45 @@ function addExpenseRecord(expenseData, callback) {
 // ตั้งค่า Headers ใน Sheets
 function initializeSheets(callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  
+
   // สร้างหรือตั้งค่า Income Sheet
   var incomeSheet = spreadsheet.getSheetByName(INCOME_SHEET);
   if (!incomeSheet) {
     incomeSheet = spreadsheet.insertSheet(INCOME_SHEET);
   }
-  
+
   // ตั้งค่า Headers สำหรับ Income Sheet
   var incomeRange = incomeSheet.getRange(1, 1, 1, INCOME_HEADERS.length);
   incomeRange.setValues([INCOME_HEADERS]);
   incomeRange.setFontWeight('bold');
   incomeRange.setBackground('#f0f0f0');
-  
+
   // สร้างหรือตั้งค่า Expense Sheet
   var expenseSheet = spreadsheet.getSheetByName(EXPENSE_SHEET);
   if (!expenseSheet) {
     expenseSheet = spreadsheet.insertSheet(EXPENSE_SHEET);
   }
-  
+
   // ตั้งค่า Headers สำหรับ Expense Sheet
   var expenseRange = expenseSheet.getRange(1, 1, 1, EXPENSE_HEADERS.length);
   expenseRange.setValues([EXPENSE_HEADERS]);
   expenseRange.setFontWeight('bold');
   expenseRange.setBackground('#f0f0f0');
-  
+
   // สร้างหรือตั้งค่า Task Sheet
   var taskSheet = spreadsheet.getSheetByName(TASK_SHEET);
   if (!taskSheet) {
     taskSheet = spreadsheet.insertSheet(TASK_SHEET);
   }
-  
+
   // ตั้งค่า Headers สำหรับ Task Sheet
   var taskRange = taskSheet.getRange(1, 1, 1, TASK_HEADERS.length);
   taskRange.setValues([TASK_HEADERS]);
   taskRange.setFontWeight('bold');
   taskRange.setBackground('#f0f0f0');
-  
+
   var result = { success: true, message: 'Sheets initialized successfully' };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -394,14 +394,14 @@ function initializeSheets(callback) {
 function getTasksData(callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(TASK_SHEET);
-  
+
   if (!sheet) {
     throw new Error('Sheet "' + TASK_SHEET + '" not found');
   }
-  
+
   var values = sheet.getDataRange().getValues();
   var result = { values: values };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -416,19 +416,19 @@ function getTasksData(callback) {
 // เพิ่ม Task ใหม่
 function addTaskRecord(taskData, callback) {
   console.log('addTaskRecord called with:', taskData);
-  
+
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(TASK_SHEET);
-  
+
   if (!sheet) {
     console.log('Creating new TaskReminder sheet');
     sheet = spreadsheet.insertSheet(TASK_SHEET);
     sheet.getRange(1, 1, 1, TASK_HEADERS.length).setValues([TASK_HEADERS]);
   }
-  
+
   var id = 'task_' + Date.now();
   var now = new Date().toISOString();
-  
+
   var rowData = [
     id,
     taskData.title,
@@ -440,13 +440,13 @@ function addTaskRecord(taskData, callback) {
     now,
     now
   ];
-  
+
   console.log('Adding row data:', rowData);
   sheet.appendRow(rowData);
   console.log('Task added successfully to sheet');
-  
+
   var result = { success: true, id: id };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -462,14 +462,14 @@ function addTaskRecord(taskData, callback) {
 function updateTaskRecord(updateData, callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(TASK_SHEET);
-  
+
   if (!sheet) {
     throw new Error('Sheet "' + TASK_SHEET + '" not found');
   }
-  
+
   var values = sheet.getDataRange().getValues();
   var rowIndex = -1;
-  
+
   // หา row ที่ต้องอัปเดต
   for (var i = 1; i < values.length; i++) {
     if (values[i][0] === updateData.id) {
@@ -477,13 +477,13 @@ function updateTaskRecord(updateData, callback) {
       break;
     }
   }
-  
+
   if (rowIndex === -1) {
     throw new Error('Task not found');
   }
-  
+
   var now = new Date().toISOString();
-  
+
   // อัปเดตข้อมูล
   if (updateData.title !== undefined) sheet.getRange(rowIndex, 2).setValue(updateData.title);
   if (updateData.type !== undefined) sheet.getRange(rowIndex, 3).setValue(updateData.type);
@@ -494,9 +494,9 @@ function updateTaskRecord(updateData, callback) {
     sheet.getRange(rowIndex, 7).setValue(updateData.completed ? 'เสร็จแล้ว' : 'รอดำเนินการ');
   }
   sheet.getRange(rowIndex, 9).setValue(now); // แก้ไขเมื่อ
-  
+
   var result = { success: true, id: updateData.id };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -512,14 +512,14 @@ function updateTaskRecord(updateData, callback) {
 function deleteTaskRecord(taskId, callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(TASK_SHEET);
-  
+
   if (!sheet) {
     throw new Error('Sheet "' + TASK_SHEET + '" not found');
   }
-  
+
   var values = sheet.getDataRange().getValues();
   var rowIndex = -1;
-  
+
   // หา row ที่ต้องลบ
   for (var i = 1; i < values.length; i++) {
     if (values[i][0] === taskId) {
@@ -527,15 +527,15 @@ function deleteTaskRecord(taskId, callback) {
       break;
     }
   }
-  
+
   if (rowIndex === -1) {
     throw new Error('Task not found');
   }
-  
+
   sheet.deleteRow(rowIndex);
-  
+
   var result = { success: true, id: taskId };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -553,12 +553,12 @@ function deleteTaskRecord(taskId, callback) {
 function getSettingsData(callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(SETTINGS_SHEET);
-  
+
   if (!sheet) {
     // สร้าง sheet ใหม่ถ้าไม่มี
     sheet = spreadsheet.insertSheet(SETTINGS_SHEET);
     sheet.getRange(1, 1, 1, SETTINGS_HEADERS.length).setValues([SETTINGS_HEADERS]);
-    
+
     // เพิ่มข้อมูลเริ่มต้น
     var defaultSettings = [
       'default',
@@ -577,11 +577,11 @@ function getSettingsData(callback) {
     ];
     sheet.appendRow(defaultSettings);
   }
-  
+
   var data = sheet.getDataRange().getValues();
-  
+
   var result = { values: data };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -597,25 +597,25 @@ function getSettingsData(callback) {
 function saveSettingsData(settingsData, callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(SETTINGS_SHEET);
-  
+
   if (!sheet) {
     sheet = spreadsheet.insertSheet(SETTINGS_SHEET);
     sheet.getRange(1, 1, 1, SETTINGS_HEADERS.length).setValues([SETTINGS_HEADERS]);
   }
-  
+
   var now = new Date().toISOString();
-  
+
   // ตรวจสอบว่ามีข้อมูลอยู่แล้วหรือไม่
   var data = sheet.getDataRange().getValues();
   var settingsRow = -1;
-  
+
   for (var i = 1; i < data.length; i++) {
     if (data[i][0] === 'default') {
       settingsRow = i + 1;
       break;
     }
   }
-  
+
   var rowData = [
     'default',
     settingsData.storeName || '',
@@ -631,7 +631,7 @@ function saveSettingsData(settingsData, callback) {
     data.length > 1 ? data[settingsRow - 1][11] : now, // เก็บ createdAt เดิม
     now // updatedAt ใหม่
   ];
-  
+
   if (settingsRow > 0) {
     // อัปเดตข้อมูลเดิม
     sheet.getRange(settingsRow, 1, 1, rowData.length).setValues([rowData]);
@@ -639,9 +639,9 @@ function saveSettingsData(settingsData, callback) {
     // เพิ่มข้อมูลใหม่
     sheet.appendRow(rowData);
   }
-  
+
   var result = { success: true, updatedAt: now };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -659,16 +659,16 @@ function saveSettingsData(settingsData, callback) {
 function getEmployeesData(callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(EMPLOYEES_SHEET);
-  
+
   if (!sheet) {
     sheet = spreadsheet.insertSheet(EMPLOYEES_SHEET);
     sheet.getRange(1, 1, 1, EMPLOYEES_HEADERS.length).setValues([EMPLOYEES_HEADERS]);
   }
-  
+
   var data = sheet.getDataRange().getValues();
-  
+
   var result = { values: data };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -684,15 +684,15 @@ function getEmployeesData(callback) {
 function addEmployeeRecord(employeeData, callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(EMPLOYEES_SHEET);
-  
+
   if (!sheet) {
     sheet = spreadsheet.insertSheet(EMPLOYEES_SHEET);
     sheet.getRange(1, 1, 1, EMPLOYEES_HEADERS.length).setValues([EMPLOYEES_HEADERS]);
   }
-  
+
   var id = 'emp_' + Date.now();
   var now = new Date().toISOString();
-  
+
   var rowData = [
     id,
     employeeData.name,
@@ -709,11 +709,11 @@ function addEmployeeRecord(employeeData, callback) {
     now,
     now
   ];
-  
+
   sheet.appendRow(rowData);
-  
+
   var result = { success: true, id: id };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -729,14 +729,14 @@ function addEmployeeRecord(employeeData, callback) {
 function updateEmployeeRecord(updateData, callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(EMPLOYEES_SHEET);
-  
+
   if (!sheet) {
     throw new Error('Sheet "' + EMPLOYEES_SHEET + '" not found');
   }
-  
+
   var data = sheet.getDataRange().getValues();
   var rowIndex = -1;
-  
+
   // หาแถวที่ต้องอัปเดต
   for (var i = 1; i < data.length; i++) {
     if (data[i][0] === updateData.id) {
@@ -744,13 +744,13 @@ function updateEmployeeRecord(updateData, callback) {
       break;
     }
   }
-  
+
   if (rowIndex === -1) {
     throw new Error('Employee not found');
   }
-  
+
   var now = new Date().toISOString();
-  
+
   // อัปเดตข้อมูล
   if (updateData.name !== undefined) sheet.getRange(rowIndex, 2).setValue(updateData.name);
   if (updateData.position !== undefined) sheet.getRange(rowIndex, 3).setValue(updateData.position);
@@ -762,12 +762,12 @@ function updateEmployeeRecord(updateData, callback) {
   if (updateData.address !== undefined) sheet.getRange(rowIndex, 10).setValue(updateData.address);
   if (updateData.note !== undefined) sheet.getRange(rowIndex, 11).setValue(updateData.note);
   if (updateData.isActive !== undefined) sheet.getRange(rowIndex, 12).setValue(updateData.isActive ? 'ทำงานอยู่' : 'ไม่ทำงานแล้ว');
-  
+
   // อัปเดตเวลา
   sheet.getRange(rowIndex, 14).setValue(now);
-  
+
   var result = { success: true };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -783,14 +783,14 @@ function updateEmployeeRecord(updateData, callback) {
 function deleteEmployeeRecord(employeeId, callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(EMPLOYEES_SHEET);
-  
+
   if (!sheet) {
     throw new Error('Sheet "' + EMPLOYEES_SHEET + '" not found');
   }
-  
+
   var data = sheet.getDataRange().getValues();
   var rowIndex = -1;
-  
+
   // หาแถวที่ต้องลบ
   for (var i = 1; i < data.length; i++) {
     if (data[i][0] === employeeId) {
@@ -798,15 +798,15 @@ function deleteEmployeeRecord(employeeId, callback) {
       break;
     }
   }
-  
+
   if (rowIndex === -1) {
     throw new Error('Employee not found');
   }
-  
+
   sheet.deleteRow(rowIndex);
-  
+
   var result = { success: true };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -824,16 +824,16 @@ function deleteEmployeeRecord(employeeId, callback) {
 function getUpdateLogsData(callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(UPDATE_LOGS_SHEET);
-  
+
   if (!sheet) {
     sheet = spreadsheet.insertSheet(UPDATE_LOGS_SHEET);
     sheet.getRange(1, 1, 1, UPDATE_LOGS_HEADERS.length).setValues([UPDATE_LOGS_HEADERS]);
   }
-  
+
   var data = sheet.getDataRange().getValues();
-  
+
   var result = { values: data };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -849,15 +849,15 @@ function getUpdateLogsData(callback) {
 function addUpdateLogRecord(logData, callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(UPDATE_LOGS_SHEET);
-  
+
   if (!sheet) {
     sheet = spreadsheet.insertSheet(UPDATE_LOGS_SHEET);
     sheet.getRange(1, 1, 1, UPDATE_LOGS_HEADERS.length).setValues([UPDATE_LOGS_HEADERS]);
   }
-  
+
   var id = 'log_' + Date.now();
   var now = new Date().toISOString();
-  
+
   var rowData = [
     id,
     logData.version,
@@ -868,11 +868,11 @@ function addUpdateLogRecord(logData, callback) {
     logData.isImportant ? 'สำคัญ' : 'ปกติ',
     now
   ];
-  
+
   sheet.appendRow(rowData);
-  
+
   var result = { success: true, id: id };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -888,14 +888,14 @@ function addUpdateLogRecord(logData, callback) {
 function updateUpdateLogRecord(updateData, callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(UPDATE_LOGS_SHEET);
-  
+
   if (!sheet) {
     throw new Error('Sheet "' + UPDATE_LOGS_SHEET + '" not found');
   }
-  
+
   var data = sheet.getDataRange().getValues();
   var rowIndex = -1;
-  
+
   // หาแถวที่ต้องอัปเดต
   for (var i = 1; i < data.length; i++) {
     if (data[i][0] === updateData.id) {
@@ -903,11 +903,11 @@ function updateUpdateLogRecord(updateData, callback) {
       break;
     }
   }
-  
+
   if (rowIndex === -1) {
     throw new Error('Update log not found');
   }
-  
+
   // อัปเดตข้อมูล
   if (updateData.version !== undefined) sheet.getRange(rowIndex, 2).setValue(updateData.version);
   if (updateData.date !== undefined) sheet.getRange(rowIndex, 3).setValue(updateData.date);
@@ -915,9 +915,9 @@ function updateUpdateLogRecord(updateData, callback) {
   if (updateData.description !== undefined) sheet.getRange(rowIndex, 5).setValue(updateData.description);
   if (updateData.type !== undefined) sheet.getRange(rowIndex, 6).setValue(updateData.type);
   if (updateData.isImportant !== undefined) sheet.getRange(rowIndex, 7).setValue(updateData.isImportant ? 'สำคัญ' : 'ปกติ');
-  
+
   var result = { success: true };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')
@@ -933,14 +933,14 @@ function updateUpdateLogRecord(updateData, callback) {
 function deleteUpdateLogRecord(logId, callback) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = spreadsheet.getSheetByName(UPDATE_LOGS_SHEET);
-  
+
   if (!sheet) {
     throw new Error('Sheet "' + UPDATE_LOGS_SHEET + '" not found');
   }
-  
+
   var data = sheet.getDataRange().getValues();
   var rowIndex = -1;
-  
+
   // หาแถวที่ต้องลบ
   for (var i = 1; i < data.length; i++) {
     if (data[i][0] === logId) {
@@ -948,15 +948,15 @@ function deleteUpdateLogRecord(logId, callback) {
       break;
     }
   }
-  
+
   if (rowIndex === -1) {
     throw new Error('Update log not found');
   }
-  
+
   sheet.deleteRow(rowIndex);
-  
+
   var result = { success: true };
-  
+
   if (callback) {
     return ContentService
       .createTextOutput(callback + '(' + JSON.stringify(result) + ');')

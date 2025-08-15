@@ -23,6 +23,8 @@ interface MonthlyData {
   expense: number;
   profit: number;
   quantity: number;
+  storeIncome: number;
+  onlineIncome: number;
 }
 
 export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: MonthlyBreakdownChartProps) {
@@ -32,7 +34,9 @@ export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: Mont
     income: true,
     expense: true,
     profit: true,
-    quantity: true
+    quantity: true,
+    storeIncome: true,
+    onlineIncome: true
   });
 
   useEffect(() => {
@@ -115,13 +119,29 @@ export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: Mont
       })
       .reduce((sum, item) => sum + item.quantity, 0);
 
+    const monthStoreIncome = filteredIncomeData
+      .filter(item => {
+        const itemDate = parseISO(item.date);
+        return itemDate >= monthStart && itemDate <= monthEnd && item.channel === 'store';
+      })
+      .reduce((sum, item) => sum + item.amount, 0);
+
+    const monthOnlineIncome = filteredIncomeData
+      .filter(item => {
+        const itemDate = parseISO(item.date);
+        return itemDate >= monthStart && itemDate <= monthEnd && item.channel === 'online';
+      })
+      .reduce((sum, item) => sum + item.amount, 0);
+
     return {
       month: format(month, 'yyyy-MM'),
       monthLabel: format(month, 'MMM yyyy', { locale: th }),
       income: monthIncome,
       expense: monthExpense,
       profit: monthIncome - monthExpense,
-      quantity: monthQuantity
+      quantity: monthQuantity,
+      storeIncome: monthStoreIncome,
+      onlineIncome: monthOnlineIncome
     };
   });
 
@@ -172,20 +192,20 @@ export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: Mont
 
       {isExpanded && (
         <CardContent>
-          {/* Summary Stats - Clickable Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          {/* Summary Stats - Clickable Cards - Mobile Optimized */}
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3 mb-6">
             <div
-              className={`cursor-pointer transition-all duration-200 rounded-lg p-3 border-2 ${visibleLines.income
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-2 sm:p-3 border-2 ${visibleLines.income
                 ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-700 shadow-md'
                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-700'
                 }`}
               onClick={() => toggleLine('income')}
             >
               <div className="flex items-center justify-between mb-1">
-                <div className="text-xs sm:text-sm text-muted-foreground">ยอดขาย</div>
-                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${visibleLines.income ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+                <div className="text-xs sm:text-sm text-muted-foreground truncate">ยอดขาย</div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${visibleLines.income ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
               </div>
-              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600 dark:text-blue-400 leading-tight">
+              <div className="text-sm sm:text-lg lg:text-xl font-bold text-blue-600 dark:text-blue-400 leading-tight break-all">
                 {formatCurrency(monthlyData.reduce((sum, item) => sum + item.income, 0))}
               </div>
               <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
@@ -194,17 +214,17 @@ export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: Mont
             </div>
 
             <div
-              className={`cursor-pointer transition-all duration-200 rounded-lg p-3 border-2 ${visibleLines.expense
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-2 sm:p-3 border-2 ${visibleLines.expense
                 ? 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-700 shadow-md'
                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-red-200 dark:hover:border-red-700'
                 }`}
               onClick={() => toggleLine('expense')}
             >
               <div className="flex items-center justify-between mb-1">
-                <div className="text-xs sm:text-sm text-muted-foreground">ค่าใช้จ่าย</div>
-                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${visibleLines.expense ? 'bg-red-500' : 'bg-gray-300'}`}></div>
+                <div className="text-xs sm:text-sm text-muted-foreground truncate">ค่าใช้จ่าย</div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${visibleLines.expense ? 'bg-red-500' : 'bg-gray-300'}`}></div>
               </div>
-              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-red-600 dark:text-red-400 leading-tight">
+              <div className="text-sm sm:text-lg lg:text-xl font-bold text-red-600 dark:text-red-400 leading-tight break-all">
                 {formatCurrency(monthlyData.reduce((sum, item) => sum + item.expense, 0))}
               </div>
               <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
@@ -213,17 +233,17 @@ export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: Mont
             </div>
 
             <div
-              className={`cursor-pointer transition-all duration-200 rounded-lg p-3 border-2 ${visibleLines.profit
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-2 sm:p-3 border-2 ${visibleLines.profit
                 ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-700 shadow-md'
                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-green-200 dark:hover:border-green-700'
                 }`}
               onClick={() => toggleLine('profit')}
             >
               <div className="flex items-center justify-between mb-1">
-                <div className="text-xs sm:text-sm text-muted-foreground">กำไร</div>
-                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${visibleLines.profit ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                <div className="text-xs sm:text-sm text-muted-foreground truncate">กำไร</div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${visibleLines.profit ? 'bg-green-500' : 'bg-gray-300'}`}></div>
               </div>
-              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 dark:text-green-400 leading-tight">
+              <div className="text-sm sm:text-lg lg:text-xl font-bold text-green-600 dark:text-green-400 leading-tight break-all">
                 {formatCurrency(monthlyData.reduce((sum, item) => sum + item.profit, 0))}
               </div>
               <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
@@ -232,21 +252,59 @@ export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: Mont
             </div>
 
             <div
-              className={`cursor-pointer transition-all duration-200 rounded-lg p-3 border-2 ${visibleLines.quantity
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-2 sm:p-3 border-2 ${visibleLines.quantity
                 ? 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-700 shadow-md'
                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-orange-200 dark:hover:border-orange-700'
                 }`}
               onClick={() => toggleLine('quantity')}
             >
               <div className="flex items-center justify-between mb-1">
-                <div className="text-xs sm:text-sm text-muted-foreground">จำนวนชิ้น</div>
-                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${visibleLines.quantity ? 'bg-orange-500' : 'bg-gray-300'}`}></div>
+                <div className="text-xs sm:text-sm text-muted-foreground truncate">จำนวนชิ้น</div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${visibleLines.quantity ? 'bg-orange-500' : 'bg-gray-300'}`}></div>
               </div>
-              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-orange-600 dark:text-orange-400 leading-tight">
+              <div className="text-sm sm:text-lg lg:text-xl font-bold text-orange-600 dark:text-orange-400 leading-tight break-all">
                 {monthlyData.reduce((sum, item) => sum + item.quantity, 0).toLocaleString()}
               </div>
               <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
                 {visibleLines.quantity ? 'คลิกซ่อน' : 'คลิกแสดง'}
+              </div>
+            </div>
+
+            <div
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-2 sm:p-3 border-2 ${visibleLines.storeIncome
+                ? 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-700 shadow-md'
+                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-purple-200 dark:hover:border-purple-700'
+                }`}
+              onClick={() => toggleLine('storeIncome')}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-xs sm:text-sm text-muted-foreground truncate">ยอดขายหน้าร้าน</div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${visibleLines.storeIncome ? 'bg-purple-500' : 'bg-gray-300'}`}></div>
+              </div>
+              <div className="text-sm sm:text-lg lg:text-xl font-bold text-purple-600 dark:text-purple-400 leading-tight break-all">
+                {formatCurrency(monthlyData.reduce((sum, item) => sum + item.storeIncome, 0))}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
+                {visibleLines.storeIncome ? 'คลิกซ่อน' : 'คลิกแสดง'}
+              </div>
+            </div>
+
+            <div
+              className={`cursor-pointer transition-all duration-200 rounded-lg p-2 sm:p-3 border-2 ${visibleLines.onlineIncome
+                ? 'bg-teal-50 dark:bg-teal-950/30 border-teal-200 dark:border-teal-700 shadow-md'
+                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-teal-200 dark:hover:border-teal-700'
+                }`}
+              onClick={() => toggleLine('onlineIncome')}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-xs sm:text-sm text-muted-foreground truncate">ยอดขายออนไลน์</div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${visibleLines.onlineIncome ? 'bg-teal-500' : 'bg-gray-300'}`}></div>
+              </div>
+              <div className="text-sm sm:text-lg lg:text-xl font-bold text-teal-600 dark:text-teal-400 leading-tight break-all">
+                {formatCurrency(monthlyData.reduce((sum, item) => sum + item.onlineIncome, 0))}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
+                {visibleLines.onlineIncome ? 'คลิกซ่อน' : 'คลิกแสดง'}
               </div>
             </div>
           </div>
@@ -338,6 +396,34 @@ export function MonthlyBreakdownChart({ incomeData, expenseData, filters }: Mont
                     dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
                     activeDot={{ r: 6, stroke: '#f59e0b', strokeWidth: 2 }}
                     name="จำนวนชิ้น"
+                  />
+                )}
+
+                {visibleLines.storeIncome && (
+                  <Line
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="storeIncome"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 3 }}
+                    activeDot={{ r: 5, stroke: '#8b5cf6', strokeWidth: 2 }}
+                    name="ยอดขายหน้าร้าน"
+                  />
+                )}
+
+                {visibleLines.onlineIncome && (
+                  <Line
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="onlineIncome"
+                    stroke="#14b8a6"
+                    strokeWidth={2}
+                    strokeDasharray="10 5"
+                    dot={{ fill: '#14b8a6', strokeWidth: 2, r: 3 }}
+                    activeDot={{ r: 5, stroke: '#14b8a6', strokeWidth: 2 }}
+                    name="ยอดขายออนไลน์"
                   />
                 )}
               </LineChart>

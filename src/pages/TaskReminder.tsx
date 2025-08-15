@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon, Plus, CheckSquare, Receipt } from "lucide-react";
 import { format, isToday, isTomorrow, isPast, differenceInDays } from "date-fns";
 import { th } from "date-fns/locale";
+import { formatDate } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useTasks } from "@/hooks/use-tasks";
 import { useSettings } from "@/hooks/use-settings";
@@ -480,9 +481,15 @@ export function TaskReminder() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1">
-                                  <h3 className="font-semibold">
-                                    {task.title}
-                                  </h3>
+                                  <div className="flex items-start justify-between gap-2 mb-2">
+                                    <h3 className="font-semibold flex-1">
+                                      {task.title}
+                                    </h3>
+                                    <div className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                                      <CalendarIcon className="h-3 w-3" />
+                                      {formatDate(task.dueDate.toISOString())}
+                                    </div>
+                                  </div>
                                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                                     <Badge variant={task.type === 'income' ? 'default' : 'secondary'}>
                                       {task.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
@@ -564,9 +571,15 @@ export function TaskReminder() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1">
-                                  <h3 className="font-semibold line-through text-muted-foreground">
-                                    {task.title}
-                                  </h3>
+                                  <div className="flex items-start justify-between gap-2 mb-2">
+                                    <h3 className="font-semibold line-through text-muted-foreground flex-1">
+                                      {task.title}
+                                    </h3>
+                                    <div className="text-xs text-muted-foreground flex items-center gap-1 opacity-75 flex-shrink-0">
+                                      <CalendarIcon className="h-3 w-3" />
+                                      {formatDate(task.dueDate.toISOString())}
+                                    </div>
+                                  </div>
                                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                                     <Badge variant={task.type === 'income' ? 'default' : 'secondary'} className="opacity-75">
                                       {task.type === 'income' ? 'รายรับ' : 'รายจ่าย'}

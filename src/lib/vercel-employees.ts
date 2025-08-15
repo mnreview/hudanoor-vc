@@ -22,10 +22,19 @@ const parseEmployeeData = (rows: any[][]): Employee[] => {
     let parsedBranchCommissions: BranchCommission[] = [];
     try {
       if (branchCommissionsValue && typeof branchCommissionsValue === 'string') {
-        parsedBranchCommissions = JSON.parse(branchCommissionsValue);
+        const parsed = JSON.parse(branchCommissionsValue);
+        // Ensure it's an array
+        parsedBranchCommissions = Array.isArray(parsed) ? parsed : [];
+      } else if (Array.isArray(branchCommissionsValue)) {
+        parsedBranchCommissions = branchCommissionsValue;
       }
     } catch (error) {
       console.warn('Failed to parse branch commissions:', error);
+      parsedBranchCommissions = [];
+    }
+    
+    // Ensure parsedBranchCommissions is always an array
+    if (!Array.isArray(parsedBranchCommissions)) {
       parsedBranchCommissions = [];
     }
     

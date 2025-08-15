@@ -8,11 +8,21 @@ import {
 import { Employee } from '@/types/employee';
 import { toast } from '@/hooks/use-toast';
 
+// Helper function to ensure employee data has correct structure
+const normalizeEmployeeData = (employees: any[]): Employee[] => {
+  return employees.map(employee => ({
+    ...employee,
+    branchCommissions: Array.isArray(employee.branchCommissions) 
+      ? employee.branchCommissions 
+      : []
+  }));
+};
+
 export const useEmployees = () => {
   const queryClient = useQueryClient();
 
   const {
-    data: employees = [],
+    data: rawEmployees = [],
     isLoading,
     error,
     refetch
@@ -23,6 +33,9 @@ export const useEmployees = () => {
     retry: 1,
     refetchOnWindowFocus: false
   });
+
+  // Normalize employee data to ensure correct structure
+  const employees = normalizeEmployeeData(rawEmployees);
 
   const addEmployeeMutation = useMutation({
     mutationFn: addEmployeeRecord,

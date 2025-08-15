@@ -36,8 +36,10 @@ const mockEmployees: Employee[] = [
     name: "สมหญิง ใจดี",
     position: "พนักงานขาย",
     salary: 15000,
-    storeCommission: 2.5,
-    onlineCommission: 3.0,
+    branchCommissions: [
+      { branchOrPlatform: "สาขาหลัก", commissionRate: 2.5 },
+      { branchOrPlatform: "Shopee", commissionRate: 3.0 }
+    ],
     startDate: "2024-01-15",
     isActive: true,
     phone: "081-234-5678",
@@ -50,8 +52,11 @@ const mockEmployees: Employee[] = [
     name: "สมชาย รักงาน",
     position: "หัวหน้าขาย",
     salary: 25000,
-    storeCommission: 3.0,
-    onlineCommission: 4.0,
+    branchCommissions: [
+      { branchOrPlatform: "สาขาหลัก", commissionRate: 3.0 },
+      { branchOrPlatform: "Lazada", commissionRate: 4.0 },
+      { branchOrPlatform: "Facebook", commissionRate: 3.5 }
+    ],
     startDate: "2023-06-01",
     isActive: true,
     phone: "082-345-6789",
@@ -577,20 +582,20 @@ export function EmployeeManagement() {
                         <div>
                           <div className="text-sm font-medium text-blue-700 dark:text-blue-300">ค่าคอมตามสาขา/แพลตฟอร์ม</div>
                           <div className="text-xs text-blue-600 dark:text-blue-400">
-                            {employee.branchCommissions?.length || 0} สาขา/แพลตฟอร์ม
+                            {Array.isArray(employee.branchCommissions) ? employee.branchCommissions.length : 0} สาขา/แพลตฟอร์ม
                           </div>
                         </div>
                       </div>
                       
-                      {employee.branchCommissions && employee.branchCommissions.length > 0 ? (
+                      {Array.isArray(employee.branchCommissions) && employee.branchCommissions.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {employee.branchCommissions.map((commission, index) => (
                             <div key={index} className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
                               <div className="text-sm font-medium text-blue-800 dark:text-blue-200 truncate">
-                                {commission.branchOrPlatform}
+                                {commission.branchOrPlatform || 'ไม่ระบุ'}
                               </div>
                               <div className="text-lg font-bold text-blue-900 dark:text-blue-100">
-                                {commission.commissionRate}%
+                                {commission.commissionRate || 0}%
                               </div>
                             </div>
                           ))}

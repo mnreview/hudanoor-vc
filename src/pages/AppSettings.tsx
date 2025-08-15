@@ -14,7 +14,6 @@ import {
   FileText,
   Save,
   Check,
-  RotateCcw,
   Loader2,
   List,
   Plus,
@@ -124,29 +123,7 @@ export function AppSettings() {
     });
   };
 
-  const handleResetSettings = () => {
-    // รีเซ็ตเป็นค่าเริ่มต้น
-    const defaultSettings = {
-      storeName: "HUDANOOR",
-      websiteName: "ระบบบันทึกรายรับ-รายจ่าย",
-      storeSlogan: "เสื้อผ้าแฟชั่นมุสลิม",
-      primaryColor: "#e11d48",
-      storeAddress: "",
-      storePhone: "",
-      storeEmail: "",
-      currency: "THB",
-      dateFormat: "DD/MM/YYYY",
-      defaultSalesTarget: 200000,
-      monthlyTarget: 200000,
-      channels: ["หน้าร้าน", "ออนไลน์"],
-      branches: ["สาขาหลัก"],
-      productCategories: ["เสื้อผ้า", "อุปกรณ์", "อื่นๆ"],
-      expenseCategories: ["ค่าเช่า", "ค่าไฟ", "วัตถุดิบ", "อื่นๆ"]
-    };
 
-    setLocalSettings({ ...localSettings, ...defaultSettings });
-    saveSettings(defaultSettings);
-  };
 
   if (isLoading) {
     return (
@@ -180,14 +157,6 @@ export function AppSettings() {
         </div>
 
         <div className="flex gap-2">
-          <Button
-            onClick={handleResetSettings}
-            variant="outline"
-            disabled={isSaving}
-          >
-            <RotateCcw className="h-4 w-4 mr-2" />
-            รีเซ็ต
-          </Button>
           <Button
             onClick={handleSaveSettings}
             disabled={isSaving}

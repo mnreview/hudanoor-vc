@@ -1,5 +1,20 @@
 [
     {
+        "id": "log_1755153600000",
+        "version": "1.6.3",
+        "type": "bugfix",
+        "title": "แก้ไขการ import formatDate ใน Task Reminder",
+        "description": "แก้ไขปัญหาการ import ฟังก์ชัน formatDate ที่ขาดหายไปในหน้า Task Reminder ทำให้การแสดงผลวันที่ทำงานได้ถูกต้อง",
+        "changes": [
+            "เพิ่ม import { formatDate } from '@/lib/utils' ในไฟล์ TaskReminder.tsx",
+            "แก้ไขปัญหาการแสดงผลวันที่ที่อาจเกิดข้อผิดพลาด"
+        ],
+        "technical_details": "เพิ่ม import statement สำหรับ formatDate utility function ใน src/pages/TaskReminder.tsx",
+        "impact": "การแสดงผลวันที่ใน Task Reminder จะทำงานได้ถูกต้องและไม่เกิด runtime errors",
+        "date": "2025-08-15",
+        "time": "14:30:00"
+    },
+    {
         "id": "log_1755153500000",
         "version": "1.6.2",
         "type": "improvement",

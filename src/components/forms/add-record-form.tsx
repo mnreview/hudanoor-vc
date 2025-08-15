@@ -24,10 +24,13 @@ interface AddRecordFormProps {
 }
 
 export function AddRecordForm({ onSubmit, isSubmitting = false }: AddRecordFormProps) {
-  const { settings } = useSettings();
+  const { settings, refetch } = useSettings();
   const [activeTab, setActiveTab] = useState<'income' | 'expense'>('income');
   const [date, setDate] = useState<Date>(new Date());
   const [channel, setChannel] = useState<Channel>('store');
+
+  // Debug: แสดงข้อมูล branches ใน console
+  console.log('AddRecordForm - Current branches:', settings.branches);
   
   // Income form state
   const [incomeForm, setIncomeForm] = useState({
@@ -185,9 +188,20 @@ export function AddRecordForm({ onSubmit, isSubmitting = false }: AddRecordFormP
           <TabsContent value="income">
             <form onSubmit={handleIncomeSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="branch_platform_income">
-                  {channel === 'store' ? 'สาขา *' : 'แพลตฟอร์ม *'}
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="branch_platform_income">
+                    {channel === 'store' ? 'สาขา *' : 'แพลตฟอร์ม *'}
+                  </Label>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => refetch()}
+                    className="text-xs h-6 px-2"
+                  >
+                    รีเฟรช
+                  </Button>
+                </div>
                 <Select 
                   value={incomeForm.branch_or_platform} 
                   onValueChange={(value) => setIncomeForm(prev => ({ ...prev, branch_or_platform: value }))}
@@ -203,6 +217,10 @@ export function AddRecordForm({ onSubmit, isSubmitting = false }: AddRecordFormP
                     ))}
                   </SelectContent>
                 </Select>
+                {/* Debug info */}
+                <div className="text-xs text-muted-foreground mt-1">
+                  ตัวเลือกปัจจุบัน: {settings.branches?.length || 0} รายการ
+                </div>
               </div>
 
               <div>

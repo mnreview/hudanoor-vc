@@ -108,8 +108,11 @@ export function EmployeeManagement() {
     refetch
   } = useEmployees();
 
-  const { settings } = useSettings();
+  const { settings, refetch: refetchSettings } = useSettings();
   const [commissionReports] = useState<EmployeeCommissionReport[]>(mockCommissionReports);
+
+  // Debug: แสดงข้อมูล branches ใน console
+  console.log('EmployeeManagement - Current branches:', settings.branches);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [formData, setFormData] = useState({

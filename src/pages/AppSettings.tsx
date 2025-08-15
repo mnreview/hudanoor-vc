@@ -71,19 +71,23 @@ export function AppSettings() {
 
   const addBranch = () => {
     if (newBranch.trim() && !localSettings.branches?.includes(newBranch.trim())) {
-      setLocalSettings({
+      const updatedSettings = {
         ...localSettings,
         branches: [...(localSettings.branches || []), newBranch.trim()]
-      });
+      };
+      setLocalSettings(updatedSettings);
+      saveSettings(updatedSettings); // บันทึกทันทีเมื่อเพิ่มสาขาใหม่
       setNewBranch('');
     }
   };
 
   const removeBranch = (branch: string) => {
-    setLocalSettings({
+    const updatedSettings = {
       ...localSettings,
       branches: localSettings.branches?.filter(b => b !== branch) || []
-    });
+    };
+    setLocalSettings(updatedSettings);
+    saveSettings(updatedSettings); // บันทึกทันทีเมื่อลบสาขา
   };
 
   const addProductCategory = () => {

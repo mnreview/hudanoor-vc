@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     }
 
     const sheetName = 'Employees';
-    const range = `${sheetName}!A:J`; // Extended to include commission columns
+    const range = `${sheetName}!A:I`; // Updated for branch commissions structure
 
     // Handle GET request (read employees)
     if (req.method === 'GET') {
@@ -45,8 +45,8 @@ export default async function handler(req, res) {
       } catch (error) {
         if (error.message.includes('Unable to parse range')) {
           return res.status(200).json({ 
-            data: [['ID', 'Name', 'Position', 'Email', 'Phone', 'HireDate', 'Salary', 'Status', 'StoreCommission', 'OnlineCommission']],
-            range: `${sheetName}!A1:J1`,
+            data: [['ID', 'Name', 'Position', 'Email', 'Phone', 'HireDate', 'Salary', 'Status', 'BranchCommissions']],
+            range: `${sheetName}!A1:I1`,
             message: 'Employees sheet not found, returning headers only'
           });
         }
@@ -72,8 +72,7 @@ export default async function handler(req, res) {
         employee.hireDate || new Date().toISOString().split('T')[0],
         parseFloat(employee.salary) || 0, // Ensure salary is stored as number
         employee.status || 'active',
-        parseFloat(employee.storeCommission) || 0, // Ensure commission is stored as number
-        parseFloat(employee.onlineCommission) || 0 // Ensure commission is stored as number
+        JSON.stringify(employee.branchCommissions || []) // Store branch commissions as JSON
       ];
 
       try {
@@ -137,11 +136,10 @@ export default async function handler(req, res) {
         if (updates.phone !== undefined) updatedRow[4] = updates.phone;
         if (updates.salary !== undefined) updatedRow[6] = parseFloat(updates.salary) || 0;
         if (updates.status !== undefined) updatedRow[7] = updates.status;
-        if (updates.storeCommission !== undefined) updatedRow[8] = parseFloat(updates.storeCommission) || 0;
-        if (updates.onlineCommission !== undefined) updatedRow[9] = parseFloat(updates.onlineCommission) || 0;
+        if (updates.branchCommissions !== undefined) updatedRow[8] = JSON.stringify(updates.branchCommissions || []);
 
         // Update the specific row
-        const updateRange = `${sheetName}!A${employeeRowIndex + 2}:J${employeeRowIndex + 2}`;
+        const updateRange = `${sheetName}!A${employeeRowIndex + 2}:I${employeeRowIndex + 2}`;
         await sheets.spreadsheets.values.update({
           spreadsheetId,
           range: updateRange,
@@ -189,7 +187,7 @@ export default async function handler(req, res) {
         }
 
         // Delete the row (Google Sheets API doesn't have direct row deletion, so we'll clear it)
-        const deleteRange = `${sheetName}!A${employeeRowIndex + 2}:J${employeeRowIndex + 2}`;
+        const deleteRange = `${sheetName}!A${employeeRowIndex + 2}:I${employeeRowIndex + 2}`;
         await sheets.spreadsheets.values.clear({
           spreadsheetId,
           range: deleteRange,

@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Employee, EmployeeCommissionReport } from "@/types/employee";
+import { Employee, EmployeeCommissionReport, BranchCommission } from "@/types/employee";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useEmployees } from "@/hooks/use-employees";
 import {
@@ -109,8 +109,7 @@ export function EmployeeManagement() {
     name: "",
     position: "",
     salary: 0,
-    storeCommission: 0,
-    onlineCommission: 0,
+    branchCommissions: [] as BranchCommission[],
     phone: "",
     email: "",
     address: "",
@@ -125,8 +124,7 @@ export function EmployeeManagement() {
       name: formData.name,
       position: formData.position,
       salary: formData.salary,
-      storeCommission: formData.storeCommission,
-      onlineCommission: formData.onlineCommission,
+      branchCommissions: formData.branchCommissions,
       phone: formData.phone,
       email: formData.email,
       address: formData.address,
@@ -147,8 +145,7 @@ export function EmployeeManagement() {
         name: "",
         position: "",
         salary: 0,
-        storeCommission: 0,
-        onlineCommission: 0,
+        branchCommissions: [],
         phone: "",
         email: "",
         address: "",
@@ -168,8 +165,7 @@ export function EmployeeManagement() {
       name: employee.name,
       position: employee.position,
       salary: employee.salary,
-      storeCommission: employee.storeCommission,
-      onlineCommission: employee.onlineCommission,
+      branchCommissions: employee.branchCommissions || [],
       phone: employee.phone || "",
       email: employee.email || "",
       address: employee.address || "",
@@ -177,6 +173,24 @@ export function EmployeeManagement() {
       isActive: employee.isActive
     });
     setIsAddDialogOpen(true);
+  };
+
+  const addBranchCommission = () => {
+    setFormData({
+      ...formData,
+      branchCommissions: [...formData.branchCommissions, { branchOrPlatform: "", commissionRate: 0 }]
+    });
+  };
+
+  const removeBranchCommission = (index: number) => {
+    const newCommissions = formData.branchCommissions.filter((_, i) => i !== index);
+    setFormData({ ...formData, branchCommissions: newCommissions });
+  };
+
+  const updateBranchCommission = (index: number, field: keyof BranchCommission, value: string | number) => {
+    const newCommissions = [...formData.branchCommissions];
+    newCommissions[index] = { ...newCommissions[index], [field]: value };
+    setFormData({ ...formData, branchCommissions: newCommissions });
   };
 
   const handleDelete = async (id: string) => {
@@ -279,26 +293,65 @@ export function EmployeeManagement() {
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="storeCommission">คอมหน้าร้าน (%)</Label>
-                  <Input
-                    id="storeCommission"
-                    type="number"
-                    step="0.1"
-                    value={formData.storeCommission || ''}
-                    onChange={(e) => setFormData({ ...formData, storeCommission: Number(e.target.value) || 0 })}
-                  />
+              </div>
+
+              {/* Branch Commissions Section */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-base font-semibold">ค่าคอมตามสาขา/แพลตฟอร์ม</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addBranchCommission}
+                    className="text-xs"
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    เพิ่มสาขา
+                  </Button>
                 </div>
-                <div>
-                  <Label htmlFor="onlineCommission">คอมออนไลน์ (%)</Label>
-                  <Input
-                    id="onlineCommission"
-                    type="number"
-                    step="0.1"
-                    value={formData.onlineCommission || ''}
-                    onChange={(e) => setFormData({ ...formData, onlineCommission: Number(e.target.value) || 0 })}
-                  />
-                </div>
+                
+                {formData.branchCommissions.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
+                    ยังไม่มีการตั้งค่าคอมมิชชั่น คลิก "เพิ่มสาขา" เพื่อเริ่มต้น
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-40 overflow-y-auto">
+                    {formData.branchCommissions.map((commission, index) => (
+                      <div key={index} className="flex gap-2 items-end p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex-1">
+                          <Label className="text-xs">สาขา/แพลตฟอร์ม</Label>
+                          <Input
+                            placeholder="เลือกหรือพิมพ์ชื่อสาขา"
+                            value={commission.branchOrPlatform}
+                            onChange={(e) => updateBranchCommission(index, 'branchOrPlatform', e.target.value)}
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="w-24">
+                          <Label className="text-xs">คอม (%)</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            placeholder="0.0"
+                            value={commission.commissionRate || ''}
+                            onChange={(e) => updateBranchCommission(index, 'commissionRate', Number(e.target.value) || 0)}
+                            className="text-sm"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeBranchCommission(index)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -499,7 +552,7 @@ export function EmployeeManagement() {
                 
                 <CardContent className="pt-0">
                   {/* Salary and Commission Highlight Section */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="space-y-4 mb-6">
                     {/* Salary Card */}
                     <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 border border-green-200 dark:border-green-700">
                       <div className="flex items-center gap-3">
@@ -515,34 +568,38 @@ export function EmployeeManagement() {
                       </div>
                     </div>
 
-                    {/* Store Commission Card */}
+                    {/* Branch Commissions Section */}
                     <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 mb-3">
                         <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
                           <Store className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-blue-700 dark:text-blue-300">คอมหน้าร้าน</div>
-                          <div className="text-2xl font-bold text-blue-800 dark:text-blue-200">
-                            {employee.storeCommission}%
+                          <div className="text-sm font-medium text-blue-700 dark:text-blue-300">ค่าคอมตามสาขา/แพลตฟอร์ม</div>
+                          <div className="text-xs text-blue-600 dark:text-blue-400">
+                            {employee.branchCommissions?.length || 0} สาขา/แพลตฟอร์ม
                           </div>
                         </div>
                       </div>
-                    </div>
-
-                    {/* Online Commission Card */}
-                    <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl p-4 border border-purple-200 dark:border-purple-700">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                          <Globe className="h-5 w-5 text-white" />
+                      
+                      {employee.branchCommissions && employee.branchCommissions.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {employee.branchCommissions.map((commission, index) => (
+                            <div key={index} className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
+                              <div className="text-sm font-medium text-blue-800 dark:text-blue-200 truncate">
+                                {commission.branchOrPlatform}
+                              </div>
+                              <div className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                                {commission.commissionRate}%
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        <div>
-                          <div className="text-sm font-medium text-purple-700 dark:text-purple-300">คอมออนไลน์</div>
-                          <div className="text-2xl font-bold text-purple-800 dark:text-purple-200">
-                            {employee.onlineCommission}%
-                          </div>
+                      ) : (
+                        <div className="text-center py-2 text-blue-600 dark:text-blue-400 text-sm">
+                          ยังไม่มีการตั้งค่าคอมมิชชั่น
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
 

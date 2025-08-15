@@ -53,7 +53,7 @@ export default async function handler(req, res) {
       },
       {
         name: 'Employees',
-        headers: ['ID', 'Name', 'Position', 'Email', 'Phone', 'HireDate', 'Salary', 'Status', 'StoreCommission', 'OnlineCommission']
+        headers: ['ID', 'Name', 'Position', 'Email', 'Phone', 'HireDate', 'Salary', 'Status', 'BranchCommissions']
       },
       {
         name: 'UpdateLogs',

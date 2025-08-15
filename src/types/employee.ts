@@ -1,10 +1,14 @@
+export interface BranchCommission {
+  branchOrPlatform: string;
+  commissionRate: number;
+}
+
 export interface Employee {
   id: string;
   name: string;
   position: string;
   salary: number;
-  storeCommission: number; // เปอร์เซ็นต์คอมหน้าร้าน
-  onlineCommission: number; // เปอร์เซ็นต์คอมออนไลน์
+  branchCommissions: BranchCommission[]; // ค่าคอมตามสาขา/แพลตฟอร์ม
   startDate: string;
   isActive: boolean;
   phone?: string;

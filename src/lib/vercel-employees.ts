@@ -1,4 +1,4 @@
-import { Employee } from '@/types/employee';
+import { Employee, BranchCommission } from '@/types/employee';
 
 // API base URL - automatically detects environment
 const API_BASE = typeof window !== 'undefined' 
@@ -17,15 +17,17 @@ const parseEmployeeData = (rows: any[][]): Employee[] => {
       parseFloat(salaryValue.replace(/,/g, '')) : // Remove commas if present
       parseFloat(salaryValue) || 0;
     
-    // Parse commission values
-    const storeCommissionValue = row[8];
-    const onlineCommissionValue = row[9];
-    const parsedStoreCommission = typeof storeCommissionValue === 'string' ? 
-      parseFloat(storeCommissionValue.replace(/,/g, '')) : 
-      parseFloat(storeCommissionValue) || 0;
-    const parsedOnlineCommission = typeof onlineCommissionValue === 'string' ? 
-      parseFloat(onlineCommissionValue.replace(/,/g, '')) : 
-      parseFloat(onlineCommissionValue) || 0;
+    // Parse branch commissions from JSON
+    const branchCommissionsValue = row[8];
+    let parsedBranchCommissions: BranchCommission[] = [];
+    try {
+      if (branchCommissionsValue && typeof branchCommissionsValue === 'string') {
+        parsedBranchCommissions = JSON.parse(branchCommissionsValue);
+      }
+    } catch (error) {
+      console.warn('Failed to parse branch commissions:', error);
+      parsedBranchCommissions = [];
+    }
     
     return {
       id: row[0] || `emp_${index + 1}`,
@@ -36,8 +38,7 @@ const parseEmployeeData = (rows: any[][]): Employee[] => {
       startDate: row[5] || new Date().toISOString().split('T')[0],
       salary: parsedSalary,
       isActive: row[7] === 'active',
-      storeCommission: parsedStoreCommission,
-      onlineCommission: parsedOnlineCommission,
+      branchCommissions: parsedBranchCommissions,
       createdAt: row[5] || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -73,8 +74,7 @@ export const addEmployeeRecord = async (employee: Omit<Employee, 'id' | 'created
       hireDate: employee.startDate,
       salary: employee.salary,
       status: employee.isActive ? 'active' : 'inactive',
-      storeCommission: employee.storeCommission || 0,
-      onlineCommission: employee.onlineCommission || 0
+      branchCommissions: employee.branchCommissions || []
     };
 
     const response = await fetch(`${API_BASE}/employees`, {
@@ -108,8 +108,7 @@ export const updateEmployeeRecord = async (employeeId: string, updates: Partial<
     if (updates.phone !== undefined) updateData.phone = updates.phone;
     if (updates.salary !== undefined) updateData.salary = updates.salary;
     if (updates.isActive !== undefined) updateData.status = updates.isActive ? 'active' : 'inactive';
-    if (updates.storeCommission !== undefined) updateData.storeCommission = updates.storeCommission;
-    if (updates.onlineCommission !== undefined) updateData.onlineCommission = updates.onlineCommission;
+    if (updates.branchCommissions !== undefined) updateData.branchCommissions = updates.branchCommissions;
 
     const response = await fetch(`${API_BASE}/employees`, {
       method: 'PUT',

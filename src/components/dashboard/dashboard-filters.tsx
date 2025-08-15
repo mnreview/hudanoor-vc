@@ -299,24 +299,25 @@ export function DashboardFilters({
                 </SelectContent>
               </Select>
 
-              {/* Date Range Display and Calendar */}
-              {getDateRangeLabel(filters) && (
-                <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded-md border border-blue-200 dark:border-blue-700">
-                  <div className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
-                    ช่วงที่เลือก: {getDateRangeLabel(filters)}
+              {/* Date Range Display and Calendar - Always Available */}
+              <div className="mt-2 space-y-2">
+                {/* Current Selection Display */}
+                {getDateRangeLabel(filters) && (
+                  <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-md border border-blue-200 dark:border-blue-700">
+                    <div className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
+                      ช่วงที่เลือก: {getDateRangeLabel(filters)}
+                    </div>
+                    <div className="text-xs text-blue-600 dark:text-blue-400">
+                      {filters.dateFrom && filters.dateTo && (
+                        <>จาก {formatDate(filters.dateFrom)} ถึง {formatDate(filters.dateTo)}</>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-xs text-blue-600 dark:text-blue-400">
-                    {filters.dateFrom && filters.dateTo && (
-                      <>จาก {formatDate(filters.dateFrom)} ถึง {formatDate(filters.dateTo)}</>
-                    )}
-                  </div>
-                </div>
-              )}
+                )}
 
-              {/* Custom Date Range with Two-Click Calendar */}
-              {(getDateRangePreset(filters) === 'custom' || isCustomDateMode) && (
-                <div className="mt-2">
-                  <Label className="text-xs text-muted-foreground mb-2 block">เลือกช่วงวันที่</Label>
+                {/* Calendar Picker - Always Available */}
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-2 block">เลือกช่วงวันที่จากปฏิทิน</Label>
                   <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                     <PopoverTrigger asChild>
                       <Button 
@@ -327,10 +328,7 @@ export function DashboardFilters({
                       >
                         <CalendarIcon className="mr-2 h-3 w-3" />
                         <span className="text-xs">
-                          {filters.dateFrom && filters.dateTo 
-                            ? `${formatDate(filters.dateFrom)} - ${formatDate(filters.dateTo)}`
-                            : "คลิกเพื่อเลือกช่วงวันที่"
-                          }
+                          คลิกเพื่อเลือกช่วงวันที่จากปฏิทิน
                         </span>
                       </Button>
                     </PopoverTrigger>
@@ -377,7 +375,7 @@ export function DashboardFilters({
                     </PopoverContent>
                   </Popover>
                 </div>
-              )}
+              </div>
             </Card>
 
             {/* Channel Filter */}

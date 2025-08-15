@@ -1,5 +1,20 @@
 [
     {
+        "id": "log_1755155400000",
+        "version": "1.8.3",
+        "type": "improvement",
+        "title": "ทำความสะอาดโค้ดในหน้าการตั้งค่า",
+        "description": "ลบ import ที่ไม่ได้ใช้งานออกจากหน้าการตั้งค่า เพื่อปรับปรุงประสิทธิภาพและความเป็นระเบียบของโค้ด",
+        "changes": [
+            "ลบ import RotateCcw ที่ไม่ได้ใช้งานออกจาก AppSettings.tsx",
+            "ปรับปรุงการจัดการ imports ให้เป็นระเบียบมากขึ้น"
+        ],
+        "technical_details": "ลบ import { RotateCcw } ออกจาก lucide-react imports ใน src/pages/AppSettings.tsx",
+        "impact": "ลดขนาดของ bundle และปรับปรุงประสิทธิภาพการโหลดหน้าการตั้งค่า ไม่มีผลกระทบต่อการใช้งานของผู้ใช้",
+        "date": "2025-08-15",
+        "time": "15:30:00"
+    },
+    {
         "id": "log_1755155300000",
         "version": "1.8.2",
         "type": "improvement",

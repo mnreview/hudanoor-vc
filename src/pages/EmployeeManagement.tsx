@@ -39,8 +39,8 @@ const mockEmployees: Employee[] = [
     position: "พนักงานขาย",
     salary: 15000,
     branchCommissions: [
-      { branchOrPlatform: "สาขาหลัก", commissionRate: 2.5 },
-      { branchOrPlatform: "Shopee", commissionRate: 3.0 }
+      { channel: "store", branchOrPlatform: "สาขาหลัก", commissionRate: 2.5 },
+      { channel: "online", branchOrPlatform: "Shopee", commissionRate: 3.0 }
     ],
     startDate: "2024-01-15",
     isActive: true,
@@ -55,9 +55,9 @@ const mockEmployees: Employee[] = [
     position: "หัวหน้าขาย",
     salary: 25000,
     branchCommissions: [
-      { branchOrPlatform: "สาขาหลัก", commissionRate: 3.0 },
-      { branchOrPlatform: "Lazada", commissionRate: 4.0 },
-      { branchOrPlatform: "Facebook", commissionRate: 3.5 }
+      { channel: "store", branchOrPlatform: "สาขาหลัก", commissionRate: 3.0 },
+      { channel: "online", branchOrPlatform: "Lazada", commissionRate: 4.0 },
+      { channel: "online", branchOrPlatform: "Facebook", commissionRate: 3.5 }
     ],
     startDate: "2023-06-01",
     isActive: true,
@@ -201,12 +201,12 @@ export function EmployeeManagement() {
   const updateBranchCommission = (index: number, field: keyof BranchCommission, value: string | number) => {
     const newCommissions = [...formData.branchCommissions];
     newCommissions[index] = { ...newCommissions[index], [field]: value };
-    
+
     // ถ้าเปลี่ยนช่องทาง ให้รีเซ็ตสาขา/แพลตฟอร์ม
     if (field === 'channel') {
       newCommissions[index].branchOrPlatform = '';
     }
-    
+
     setFormData({ ...formData, branchCommissions: newCommissions });
   };
 
@@ -335,45 +335,79 @@ export function EmployeeManagement() {
                 ) : (
                   <div className="space-y-3 max-h-40 overflow-y-auto">
                     {formData.branchCommissions.map((commission, index) => (
-                      <div key={index} className="flex gap-2 items-end p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div className="flex-1">
-                          <Label className="text-xs">สาขา/แพลตฟอร์ม</Label>
-                          <Select
-                            value={commission.branchOrPlatform}
-                            onValueChange={(value) => updateBranchCommission(index, 'branchOrPlatform', value)}
+                      <div key={index} className="space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex gap-2 items-end">
+                          <div className="flex-1">
+                            <Label className="text-xs">ช่องทางขาย</Label>
+                            <Select
+                              value={commission.channel}
+                              onValueChange={(value: 'store' | 'online') => updateBranchCommission(index, 'channel', value)}
+                            >
+                              <SelectTrigger className="text-sm">
+                                <SelectValue placeholder="เลือกช่องทาง" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="store">หน้าร้าน</SelectItem>
+                                <SelectItem value="online">ออนไลน์</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="w-24">
+                            <Label className="text-xs">คอม (%)</Label>
+                            <Input
+                              type="number"
+                              step="0.1"
+                              placeholder="0.0"
+                              value={commission.commissionRate || ''}
+                              onChange={(e) => updateBranchCommission(index, 'commissionRate', Number(e.target.value) || 0)}
+                              className="text-sm"
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeBranchCommission(index)}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2"
                           >
-                            <SelectTrigger className="text-sm">
-                              <SelectValue placeholder="เลือกสาขา/แพลตฟอร์ม" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {(settings.branches || ['สาขาหลัก']).map(branch => (
-                                <SelectItem key={branch} value={branch}>
-                                  {branch}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
                         </div>
-                        <div className="w-24">
-                          <Label className="text-xs">คอม (%)</Label>
-                          <Input
-                            type="number"
-                            step="0.1"
-                            placeholder="0.0"
-                            value={commission.commissionRate || ''}
-                            onChange={(e) => updateBranchCommission(index, 'commissionRate', Number(e.target.value) || 0)}
-                            className="text-sm"
-                          />
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeBranchCommission(index)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+
+                        {commission.channel && (
+                          <div>
+                            <Label className="text-xs">{commission.channel === 'store' ? 'สาขา' : 'แพลตฟอร์ม'}</Label>
+                            <Select
+                              value={commission.branchOrPlatform}
+                              onValueChange={(value) => updateBranchCommission(index, 'branchOrPlatform', value)}
+                            >
+                              <SelectTrigger className="text-sm">
+                                <SelectValue placeholder={`เลือก${commission.channel === 'store' ? 'สาขา' : 'แพลตฟอร์ม'}`} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(() => {
+                                  const availableOptions = commission.channel === 'store'
+                                    ? (settings.branchesByChannel?.store || settings.branches || ['สาขาหลัก'])
+                                    : (settings.branchesByChannel?.online || ['Shopee', 'Lazada', 'Facebook']);
+                                  
+                                  return availableOptions.filter(branch => branch && branch.trim() !== '').map(branch => (
+                                    <SelectItem key={branch} value={branch}>
+                                      {branch}
+                                    </SelectItem>
+                                  ));
+                                })()}
+                              </SelectContent>
+                            </Select>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              ตัวเลือกสำหรับ{commission.channel === 'store' ? 'หน้าร้าน' : 'ออนไลน์'}: {
+                                (commission.channel === 'store'
+                                  ? (settings.branchesByChannel?.store || settings.branches || ['สาขาหลัก'])
+                                  : (settings.branchesByChannel?.online || ['Shopee', 'Lazada', 'Facebook'])
+                                ).filter(branch => branch && branch.trim() !== '').length
+                              } รายการ
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -612,6 +646,11 @@ export function EmployeeManagement() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {employee.branchCommissions.map((commission, index) => (
                             <div key={index} className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
+                              <div className="flex items-center gap-1 mb-1">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                                  {commission.channel === 'store' ? 'หน้าร้าน' : 'ออนไลน์'}
+                                </span>
+                              </div>
                               <div className="text-sm font-medium text-blue-800 dark:text-blue-200 truncate">
                                 {commission.branchOrPlatform || 'ไม่ระบุ'}
                               </div>

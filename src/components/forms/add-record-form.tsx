@@ -30,7 +30,15 @@ export function AddRecordForm({ onSubmit, isSubmitting = false }: AddRecordFormP
   const [channel, setChannel] = useState<Channel>('store');
 
   // Debug: แสดงข้อมูล branches ใน console
-  console.log('AddRecordForm - Current branches:', settings.branches);
+  console.log('AddRecordForm - Current branchesByChannel:', settings.branchesByChannel);
+  
+  // Get available branches based on selected channel
+  const getAvailableBranches = (channel: Channel): string[] => {
+    if (!settings.branchesByChannel) {
+      return settings.branches || ['สาขาหลัก'];
+    }
+    return settings.branchesByChannel[channel] || [];
+  };
   
   // Income form state
   const [incomeForm, setIncomeForm] = useState({
@@ -57,7 +65,7 @@ export function AddRecordForm({ onSubmit, isSubmitting = false }: AddRecordFormP
     if (!incomeForm.branch_or_platform || !incomeForm.product_name || !incomeForm.product_category) {
       toast({
         title: "กรุณากรอกข้อมูลให้ครบ",
-        description: "สาขา/แพลตฟอร์ม ชื่อสินค้า และหมวดหมู่สินค้าเป็นข้อมูลที่จำเป็น",
+        description: "ช่องทางขาย สาขา/แพลตฟอร์ม ชื่อสินค้า และหมวดหมู่สินค้าเป็นข้อมูลที่จำเป็น",
         variant: "destructive"
       });
       return;
@@ -93,7 +101,7 @@ export function AddRecordForm({ onSubmit, isSubmitting = false }: AddRecordFormP
     if (!expenseForm.branch_or_platform || !expenseForm.expense_item || !expenseForm.expense_category) {
       toast({
         title: "กรุณากรอกข้อมูลให้ครบ",
-        description: "สาขา/แพลตฟอร์ม รายการจ่าย และหมวดหมู่จ่ายเป็นข้อมูลที่จำเป็น",
+        description: "ช่องทางขาย สาขา/แพลตฟอร์ม รายการจ่าย และหมวดหมู่จ่ายเป็นข้อมูลที่จำเป็น",
         variant: "destructive"
       });
       return;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,10 @@ interface DashboardFiltersProps {
   availableBranches: string[];
   availableProductCategories: string[];
   availableExpenseCategories: string[];
+  branchesByChannel?: {
+    store: string[];
+    online: string[];
+  };
 }
 
 export function DashboardFilters({
@@ -26,7 +30,8 @@ export function DashboardFilters({
   onFiltersChange,
   availableBranches,
   availableProductCategories,
-  availableExpenseCategories
+  availableExpenseCategories,
+  branchesByChannel
 }: DashboardFiltersProps) {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -39,6 +44,31 @@ export function DashboardFilters({
   };
 
   const hasActiveFilters = Object.keys(filters).length > 0;
+
+  // Reset branch selection when channel changes
+  useEffect(() => {
+    if (filters.channels?.length && filters.branches?.length) {
+      // ตรวจสอบว่าสาขา/แพลตฟอร์มที่เลือกอยู่ยังอยู่ในช่องทางที่เลือกหรือไม่
+      const selectedChannel = filters.channels[0];
+      const selectedBranch = filters.branches[0];
+      
+      let availableBranchesForChannel: string[] = [];
+      if (branchesByChannel) {
+        if (selectedChannel === 'store') {
+          availableBranchesForChannel = branchesByChannel.store || [];
+        } else if (selectedChannel === 'online') {
+          availableBranchesForChannel = branchesByChannel.online || [];
+        }
+      } else {
+        availableBranchesForChannel = availableBranches;
+      }
+      
+      // ถ้าสาขา/แพลตฟอร์มที่เลือกไม่อยู่ในช่องทางใหม่ ให้ reset
+      if (!availableBranchesForChannel.includes(selectedBranch)) {
+        onFiltersChange({ ...filters, branches: [] });
+      }
+    }
+  }, [filters.channels, branchesByChannel, availableBranches]);
 
   // Helper function to get current date range preset
   const getDateRangePreset = (filters: FilterOptions): string => {
@@ -399,7 +429,7 @@ export function DashboardFilters({
               </Select>
             </Card>
 
-            {/* Branch/Platform Filter */}
+            {/* Branch/Platform Filter - depends on channel selection */}
             <Card className="p-4">
               <Label className="text-sm font-medium mb-2 block">สาขา/แพลตฟอร์ม</Label>
               <Select
@@ -408,17 +438,50 @@ export function DashboardFilters({
                   ...filters,
                   branches: value === "all" ? [] : [value]
                 })}
+                disabled={!filters.channels?.length}
               >
                 <SelectTrigger className="h-9">
-                  <SelectValue placeholder="เลือกสาขา/แพลตฟอร์ม" />
+                  <SelectValue placeholder={
+                    !filters.channels?.length 
+                      ? "เลือกช่องทางก่อน" 
+                      : "เลือกสาขา/แพลตฟอร์ม"
+                  } />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">ทั้งหมด</SelectItem>
-                  {availableBranches.filter(branch => branch && branch.trim() !== '').map(branch => (
-                    <SelectItem key={branch} value={branch}>{branch}</SelectItem>
-                  ))}
+                  {(() => {
+                    if (!filters.channels?.length) return [];
+                    
+                    const selectedChannel = filters.channels[0];
+                    let branchesForChannel: string[] = [];
+                    
+                    if (branchesByChannel) {
+                      // ใช้ branchesByChannel ถ้ามี
+                      if (selectedChannel === 'store') {
+                        branchesForChannel = branchesByChannel.store || [];
+                      } else if (selectedChannel === 'online') {
+                        branchesForChannel = branchesByChannel.online || [];
+                      }
+                    } else {
+                      // fallback ไปใช้ availableBranches เดิม
+                      branchesForChannel = availableBranches.filter(branch => 
+                        branch && branch.trim() !== ''
+                      );
+                    }
+                    
+                    return branchesForChannel
+                      .filter(branch => branch && branch.trim() !== '')
+                      .map(branch => (
+                        <SelectItem key={branch} value={branch}>{branch}</SelectItem>
+                      ));
+                  })()}
                 </SelectContent>
               </Select>
+              {!filters.channels?.length && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  กรุณาเลือกช่องทางขายก่อน
+                </div>
+              )}
             </Card>
 
             {/* Product Categories Filter */}

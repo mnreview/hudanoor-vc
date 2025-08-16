@@ -40,13 +40,13 @@ const defaultSettings = {
   defaultSalesTarget: 200000,
   monthlyTarget: 200000,
   channels: ["หน้าร้าน", "ออนไลน์"],
-  branches: ["สาขาหลัก"], // เก็บไว้เพื่อ backward compatibility
+  branches: ["สาขาหลัก", "Lotus Yala", "ตลาดใหม่", "Shopee", "Lazada", "Facebook", "TikTok"], // เก็บไว้เพื่อ backward compatibility
   branchesByChannel: {
-    store: ["สาขาหลัก"],
-    online: ["Shopee", "Lazada", "Facebook"]
+    store: ["สาขาหลัก", "Lotus Yala", "ตลาดใหม่"],
+    online: ["Shopee", "Lazada", "Facebook", "TikTok"]
   },
-  productCategories: ["เสื้อผ้า", "อุปกรณ์", "อื่นๆ"],
-  expenseCategories: ["ค่าเช่า", "ค่าไฟ", "วัตถุดิบ", "อื่นๆ"]
+  productCategories: ["มินิเดรส", "เดรสสั่งตัด", "เดรสยาว", "ผ้าคลุม", "กระโปรง", "กางเกง", "เสื้อสั้น"],
+  expenseCategories: ["วัตถุดิบ", "โลจิสติกส์", "สาธารณูปโภค", "การตลาด", "เครื่องมือ"]
 };
 
 // Read settings data from Google Sheets via Vercel API

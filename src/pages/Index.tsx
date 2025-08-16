@@ -413,6 +413,7 @@ const Index = () => {
           availableBranches={availableBranches}
           availableProductCategories={availableProductCategories}
           availableExpenseCategories={availableExpenseCategories}
+          branchesByChannel={settings.branchesByChannel}
         />
 
 

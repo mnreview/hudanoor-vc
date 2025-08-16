@@ -16,6 +16,7 @@ import { Employee, EmployeeCommissionReport, BranchCommission } from "@/types/em
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useEmployees } from "@/hooks/use-employees";
 import { useSettings } from "@/hooks/use-settings";
+import { useCommissionReports } from "@/hooks/use-commission-reports";
 import {
   Plus,
   Users,
@@ -32,68 +33,9 @@ import {
   AlertCircle
 } from "lucide-react";
 
-const mockEmployees: Employee[] = [
-  {
-    id: "1",
-    name: "สมหญิง ใจดี",
-    position: "พนักงานขาย",
-    salary: 15000,
-    branchCommissions: [
-      { channel: "store", branchOrPlatform: "สาขาหลัก", commissionRate: 2.5 },
-      { channel: "online", branchOrPlatform: "Shopee", commissionRate: 3.0 }
-    ],
-    startDate: "2024-01-15",
-    isActive: true,
-    phone: "081-234-5678",
-    email: "somying@example.com",
-    createdAt: "2024-01-15T09:00:00Z",
-    updatedAt: "2024-01-15T09:00:00Z"
-  },
-  {
-    id: "2",
-    name: "สมชาย รักงาน",
-    position: "หัวหน้าขาย",
-    salary: 25000,
-    branchCommissions: [
-      { channel: "store", branchOrPlatform: "สาขาหลัก", commissionRate: 3.0 },
-      { channel: "online", branchOrPlatform: "Lazada", commissionRate: 4.0 },
-      { channel: "online", branchOrPlatform: "Facebook", commissionRate: 3.5 }
-    ],
-    startDate: "2023-06-01",
-    isActive: true,
-    phone: "082-345-6789",
-    email: "somchai@example.com",
-    createdAt: "2023-06-01T09:00:00Z",
-    updatedAt: "2023-06-01T09:00:00Z"
-  }
-];
 
-const mockCommissionReports: EmployeeCommissionReport[] = [
-  {
-    employeeId: "1",
-    employeeName: "สมหญิง ใจดี",
-    period: "2024-12",
-    storeSales: 50000,
-    onlineSales: 30000,
-    storeCommission: 1250,
-    onlineCommission: 900,
-    totalCommission: 2150,
-    salary: 15000,
-    totalEarnings: 17150
-  },
-  {
-    employeeId: "2",
-    employeeName: "สมชาย รักงาน",
-    period: "2024-12",
-    storeSales: 80000,
-    onlineSales: 45000,
-    storeCommission: 2400,
-    onlineCommission: 1800,
-    totalCommission: 4200,
-    salary: 25000,
-    totalEarnings: 29200
-  }
-];
+
+
 
 export function EmployeeManagement() {
   const {
@@ -110,7 +52,16 @@ export function EmployeeManagement() {
   } = useEmployees();
 
   const { settings, refetch: refetchSettings } = useSettings();
-  const [commissionReports] = useState<EmployeeCommissionReport[]>(mockCommissionReports);
+  
+  // ใช้ข้อมูลคอมมิชชั่นจริงแทน mock data
+  const { 
+    reports: commissionReports, 
+    isLoading: isLoadingCommissions,
+    error: commissionError,
+    totalCommissions,
+    reportPeriod,
+    refetch: refetchCommissions
+  } = useCommissionReports();
 
   // Debug: แสดงข้อมูล branches ใน console
   console.log('EmployeeManagement - Current branches:', settings.branches);
@@ -471,8 +422,7 @@ export function EmployeeManagement() {
                     name: "",
                     position: "",
                     salary: 0,
-                    storeCommission: 0,
-                    onlineCommission: 0,
+                    branchCommissions: [],
                     phone: "",
                     email: "",
                     address: "",
@@ -533,10 +483,14 @@ export function EmployeeManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(commissionReports.reduce((sum, report) => sum + report.totalCommission, 0))}
+              {isLoadingCommissions ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                formatCurrency(totalCommissions || 0)
+              )}
             </div>
             <p className="text-xs text-muted-foreground">
-              จากยอดขายทั้งหมด
+              {reportPeriod ? `เดือน ${reportPeriod}` : 'เดือนปัจจุบัน'}
             </p>
           </CardContent>
         </Card>
@@ -731,40 +685,160 @@ export function EmployeeManagement() {
         <TabsContent value="commission" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>รายงานคอมมิชชั่นประจำเดือน</CardTitle>
-              <CardDescription>
-                คำนวณค่าคอมมิชชั่นจากยอดขายหน้าร้านและออนไลน์
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>รายงานคอมมิชชั่นประจำเดือน</CardTitle>
+                  <CardDescription>
+                    คำนวณจากยอดขายจริงและอัตราคอมมิชชั่นของแต่ละพนักงาน
+                    {reportPeriod && ` (${reportPeriod})`}
+                  </CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={refetchCommissions}
+                  disabled={isLoadingCommissions}
+                >
+                  {isLoadingCommissions ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                  )}
+                  รีเฟรชข้อมูล
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>พนักงาน</TableHead>
-                    <TableHead className="text-right">ยอดขายหน้าร้าน</TableHead>
-                    <TableHead className="text-right">ยอดขายออนไลน์</TableHead>
-                    <TableHead className="text-right">คอมหน้าร้าน</TableHead>
-                    <TableHead className="text-right">คอมออนไลน์</TableHead>
-                    <TableHead className="text-right">คอมรวม</TableHead>
-                    <TableHead className="text-right">เงินเดือน</TableHead>
-                    <TableHead className="text-right">รวมทั้งหมด</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {commissionReports.map((report) => (
-                    <TableRow key={`${report.employeeId}-${report.period}`}>
-                      <TableCell className="font-medium">{report.employeeName}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(report.storeSales)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(report.onlineSales)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(report.storeCommission)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(report.onlineCommission)}</TableCell>
-                      <TableCell className="text-right font-semibold">{formatCurrency(report.totalCommission)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(report.salary)}</TableCell>
-                      <TableCell className="text-right font-bold">{formatCurrency(report.totalEarnings)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              {isLoadingCommissions ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin mr-3" />
+                  <span>กำลังคำนวณคอมมิชชั่น...</span>
+                </div>
+              ) : commissionError ? (
+                <div className="text-center py-8">
+                  <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">เกิดข้อผิดพลาด</h3>
+                  <p className="text-muted-foreground mb-4">{commissionError}</p>
+                  <Button onClick={refetchCommissions} variant="outline">
+                    ลองใหม่อีกครั้ง
+                  </Button>
+                </div>
+              ) : commissionReports.length === 0 ? (
+                <div className="text-center py-8">
+                  <Calculator className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">ไม่มีข้อมูลคอมมิชชั่น</h3>
+                  <p className="text-muted-foreground">
+                    ยังไม่มีพนักงานที่มีการตั้งค่าคอมมิชชั่นหรือยอดขายในเดือนนี้
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-700">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                            <Store className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-green-700 dark:text-green-300">คอมหน้าร้าน</div>
+                            <div className="text-xl font-bold text-green-800 dark:text-green-200">
+                              {formatCurrency(commissionReports.reduce((sum, report) => sum + report.storeCommission, 0))}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-200 dark:border-blue-700">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <Globe className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-blue-700 dark:text-blue-300">คอมออนไลน์</div>
+                            <div className="text-xl font-bold text-blue-800 dark:text-blue-200">
+                              {formatCurrency(commissionReports.reduce((sum, report) => sum + report.onlineCommission, 0))}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200 dark:border-purple-700">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                            <TrendingUp className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-purple-700 dark:text-purple-300">คอมรวม</div>
+                            <div className="text-xl font-bold text-purple-800 dark:text-purple-200">
+                              {formatCurrency(totalCommissions)}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Commission Table */}
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>พนักงาน</TableHead>
+                          <TableHead className="text-right">ยอดขายหน้าร้าน</TableHead>
+                          <TableHead className="text-right">ยอดขายออนไลน์</TableHead>
+                          <TableHead className="text-right">คอมหน้าร้าน</TableHead>
+                          <TableHead className="text-right">คอมออนไลน์</TableHead>
+                          <TableHead className="text-right">คอมรวม</TableHead>
+                          <TableHead className="text-right">เงินเดือน</TableHead>
+                          <TableHead className="text-right">รวมทั้งหมด</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {commissionReports.map((report) => (
+                          <TableRow key={`${report.employeeId}-${report.period}`}>
+                            <TableCell className="font-medium">{report.employeeName}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(report.storeSales)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(report.onlineSales)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(report.storeCommission)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(report.onlineCommission)}</TableCell>
+                            <TableCell className="text-right font-semibold text-green-600">
+                              {formatCurrency(report.totalCommission)}
+                            </TableCell>
+                            <TableCell className="text-right">{formatCurrency(report.salary)}</TableCell>
+                            <TableCell className="text-right font-bold text-blue-600">
+                              {formatCurrency(report.totalEarnings)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Total Summary */}
+                  <div className="border-t pt-4">
+                    <div className="flex justify-between items-center text-lg font-semibold">
+                      <span>รวมทั้งหมด ({commissionReports.length} คน)</span>
+                      <div className="flex gap-6">
+                        <span className="text-green-600">
+                          คอม: {formatCurrency(totalCommissions)}
+                        </span>
+                        <span className="text-blue-600">
+                          เงินเดือน: {formatCurrency(commissionReports.reduce((sum, report) => sum + report.salary, 0))}
+                        </span>
+                        <span className="text-purple-600">
+                          รวม: {formatCurrency(commissionReports.reduce((sum, report) => sum + report.totalEarnings, 0))}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

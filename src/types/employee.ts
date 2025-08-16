@@ -31,4 +31,5 @@ export interface EmployeeCommissionReport {
   totalCommission: number;
   salary: number;
   totalEarnings: number;
+  branchCommissions?: BranchCommission[]; // เพิ่มข้อมูลการตั้งค่าคอมมิชชั่น
 }

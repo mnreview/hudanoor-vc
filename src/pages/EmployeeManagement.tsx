@@ -30,7 +30,8 @@ import {
   Store,
   Globe,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Calendar
 } from "lucide-react";
 
 
@@ -53,6 +54,12 @@ export function EmployeeManagement() {
 
   const { settings, refetch: refetchSettings } = useSettings();
   
+  // State สำหรับเลือกเดือนในรายงานคอมมิชชั่น
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
+    // Default เป็นเดือนปัจจุบัน
+    return new Date().toISOString().substring(0, 7); // YYYY-MM format
+  });
+  
   // ใช้ข้อมูลคอมมิชชั่นจริงแทน mock data
   const { 
     reports: commissionReports, 
@@ -60,8 +67,9 @@ export function EmployeeManagement() {
     error: commissionError,
     totalCommissions,
     reportPeriod,
-    refetch: refetchCommissions
-  } = useCommissionReports();
+    refetch: refetchCommissions,
+    fetchReports
+  } = useCommissionReports(selectedPeriod);
 
   // Debug: แสดงข้อมูล branches ใน console
   console.log('EmployeeManagement - Current branches:', settings.branches);
@@ -171,6 +179,31 @@ export function EmployeeManagement() {
 
   const activeEmployees = employees.filter(emp => emp.isActive);
   const totalSalary = activeEmployees.reduce((sum, emp) => sum + emp.salary, 0);
+
+  // สร้างรายการเดือนสำหรับ dropdown (12 เดือนย้อนหลัง)
+  const generateMonthOptions = () => {
+    const options = [];
+    const currentDate = new Date();
+    
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      const value = date.toISOString().substring(0, 7); // YYYY-MM
+      const label = date.toLocaleDateString('th-TH', { 
+        year: 'numeric', 
+        month: 'long' 
+      });
+      options.push({ value, label });
+    }
+    
+    return options;
+  };
+
+  const monthOptions = generateMonthOptions();
+
+  // ฟังก์ชันเปลี่ยนเดือน
+  const handlePeriodChange = (period: string) => {
+    setSelectedPeriod(period);
+  };
 
   // Loading state
   if (isLoading) {
@@ -686,26 +719,47 @@ export function EmployeeManagement() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex-1">
                   <CardTitle>รายงานคอมมิชชั่นประจำเดือน</CardTitle>
                   <CardDescription>
                     คำนวณจากยอดขายจริงและอัตราคอมมิชชั่นของแต่ละพนักงาน
-                    {reportPeriod && ` (${reportPeriod})`}
                   </CardDescription>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={refetchCommissions}
-                  disabled={isLoadingCommissions}
-                >
-                  {isLoadingCommissions ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                  )}
-                  รีเฟรชข้อมูล
-                </Button>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="period-select" className="text-sm font-medium whitespace-nowrap">
+                      เลือกเดือน:
+                    </Label>
+                    <Select 
+                      value={selectedPeriod} 
+                      onValueChange={handlePeriodChange}
+                    >
+                      <SelectTrigger className="w-40" id="period-select">
+                        <SelectValue placeholder="เลือกเดือน" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {monthOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={refetchCommissions}
+                    disabled={isLoadingCommissions}
+                  >
+                    {isLoadingCommissions ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                    )}
+                    รีเฟรชข้อมูล
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -727,12 +781,25 @@ export function EmployeeManagement() {
                 <div className="text-center py-8">
                   <Calculator className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">ไม่มีข้อมูลคอมมิชชั่น</h3>
-                  <p className="text-muted-foreground">
-                    ยังไม่มีพนักงานที่มีการตั้งค่าคอมมิชชั่นหรือยอดขายในเดือนนี้
+                  <p className="text-muted-foreground mb-2">
+                    ไม่พบข้อมูลคอมมิชชั่นสำหรับเดือน {monthOptions.find(opt => opt.value === selectedPeriod)?.label}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    อาจเป็นเพราะยังไม่มีพนักงานที่มีการตั้งค่าคอมมิชชั่นหรือยอดขายในเดือนนี้
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Period Display */}
+                  <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                      <Calendar className="h-4 w-4" />
+                      <span className="text-sm font-medium">
+                        รายงานประจำเดือน: {monthOptions.find(opt => opt.value === selectedPeriod)?.label || selectedPeriod}
+                      </span>
+                    </div>
+                  </div>
+
                   {/* Summary Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-700">
@@ -823,7 +890,12 @@ export function EmployeeManagement() {
                   {/* Total Summary */}
                   <div className="border-t pt-4">
                     <div className="flex justify-between items-center text-lg font-semibold">
-                      <span>รวมทั้งหมด ({commissionReports.length} คน)</span>
+                      <div className="flex flex-col">
+                        <span>รวมทั้งหมด ({commissionReports.length} คน)</span>
+                        <span className="text-sm font-normal text-muted-foreground">
+                          {monthOptions.find(opt => opt.value === selectedPeriod)?.label}
+                        </span>
+                      </div>
                       <div className="flex gap-6">
                         <span className="text-green-600">
                           คอม: {formatCurrency(totalCommissions)}

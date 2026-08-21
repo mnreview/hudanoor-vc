@@ -71,14 +71,16 @@ export default async function handler(req, res) {
           args: []
         });
 
-        // ยอดขายเก่าที่ไม่ได้ผูกล็อต — เกลี่ยแบบเข้าก่อนออกก่อน (FIFO) ภายใน SKU/สี/ไซส์เดียวกัน
-        // เพื่อให้ผลรวมคงเหลือรายล็อตตรงกับ view=inventory
+        // ยอดขายที่ผูกล็อตไม่ได้ — ไม่ได้ระบุล็อต หรือระบุล็อตที่ถูกลบไปแล้ว
+        // ต้องนับด้วย ไม่งั้นคงเหลือรายล็อตจะมากกว่าความจริงและไม่ตรงกับ view=inventory
         const unlinkedResult = await db.execute({
           sql: `
-            SELECT sku, color, size, SUM(quantity) AS qty_sold
-            FROM sales_orders
-            WHERE stock_in_id IS NULL OR stock_in_id = ''
-            GROUP BY sku, color, size
+            SELECT so.sku, so.color, so.size, SUM(so.quantity) AS qty_sold
+            FROM sales_orders so
+            WHERE so.stock_in_id IS NULL
+               OR so.stock_in_id = ''
+               OR NOT EXISTS (SELECT 1 FROM stock_in s WHERE s.id = so.stock_in_id)
+            GROUP BY so.sku, so.color, so.size
           `,
           args: []
         });
@@ -88,18 +90,14 @@ export default async function handler(req, res) {
           unlinkedResult.rows.map((r) => [groupKey(r), Number(r.qty_sold) || 0])
         );
 
+        // รอบแรก — หักยอดที่ผูกล็อตไว้ตรง ๆ ส่วนที่เกินจำนวนของล็อตนั้นโยนเข้ากองรอเกลี่ย
         const lots = lotsResult.rows.map((r) => {
           const quantity = Number(r.quantity) || 0;
-          let qtySold = Math.min(Number(r.linked_sold) || 0, quantity);
-
+          const linkedSold = Number(r.linked_sold) || 0;
           const key = groupKey(r);
-          const pending = pendingSold.get(key) || 0;
-          if (pending > 0) {
-            const take = Math.min(pending, quantity - qtySold);
-            if (take > 0) {
-              qtySold += take;
-              pendingSold.set(key, pending - take);
-            }
+
+          if (linkedSold > quantity) {
+            pendingSold.set(key, (pendingSold.get(key) || 0) + (linkedSold - quantity));
           }
 
           return {
@@ -117,10 +115,25 @@ export default async function handler(req, res) {
             image_url: r.image_url,
             recorded_by: r.recorded_by,
             created_at: r.created_at,
-            qty_sold: qtySold,
-            remaining: quantity - qtySold
+            qty_sold: Math.min(linkedSold, quantity),
+            remaining: quantity - Math.min(linkedSold, quantity)
           };
         });
+
+        // รอบสอง — เกลี่ยยอดที่เหลือแบบเข้าก่อนออกก่อน (FIFO) ภายใน SKU/สี/ไซส์เดียวกัน
+        // (lotsResult เรียงตามวันที่รับเข้าจากเก่าไปใหม่อยู่แล้ว)
+        for (const lot of lots) {
+          const key = groupKey(lot);
+          const pending = pendingSold.get(key) || 0;
+          if (pending <= 0) continue;
+
+          const take = Math.min(pending, lot.remaining);
+          if (take > 0) {
+            lot.qty_sold += take;
+            lot.remaining -= take;
+            pendingSold.set(key, pending - take);
+          }
+        }
 
         return res.status(200).json({ data: lots });
       }

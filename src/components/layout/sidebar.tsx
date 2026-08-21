@@ -20,7 +20,8 @@ import {
   LogOut,
   ShieldAlert,
   History,
-  Wallet
+  Wallet,
+  CircleDollarSign
 } from "lucide-react";
 
 interface SidebarProps {
@@ -44,6 +45,7 @@ const menuGroups = [
       { id: "sales-entry",      label: "บันทึกยอดขาย",    icon: ShoppingCart },
       { id: "order-history",    label: "ประวัติการขาย",   icon: History },
       { id: "stock-inventory",  label: "สต๊อกคงเหลือ",    icon: Package },
+      { id: "stock-value",      label: "สรุปมูลค่าสต๊อก",  icon: CircleDollarSign },
       { id: "task-reminder",    label: "Task Reminder",    icon: CheckSquare },
       { id: "employees",        label: "จัดการพนักงาน",   icon: Users },
     ],

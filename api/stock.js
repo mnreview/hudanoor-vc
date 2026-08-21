@@ -46,6 +46,85 @@ export default async function handler(req, res) {
         return res.status(200).json({ data: result.rows });
       }
 
+      // view=lots — คืนสต๊อกรายล็อตนำเข้า (1 แถว stock_in = 1 ล็อต) พร้อมยอดขาย/คงเหลือของล็อตนั้น
+      if (view === 'lots') {
+        const lotsResult = await db.execute({
+          sql: `
+            SELECT
+              s.id, s.date, s.sku, s.product_name,
+              COALESCE(s.product_category, '') AS product_category,
+              s.color, s.size, s.quantity, s.cost_price, s.sell_price,
+              COALESCE(s.note, '') AS note,
+              COALESCE(s.image_url, '') AS image_url,
+              COALESCE(s.recorded_by, '') AS recorded_by,
+              s.created_at,
+              COALESCE(linked.qty_sold, 0) AS linked_sold
+            FROM stock_in s
+            LEFT JOIN (
+              SELECT stock_in_id, SUM(quantity) AS qty_sold
+              FROM sales_orders
+              WHERE stock_in_id IS NOT NULL AND stock_in_id != ''
+              GROUP BY stock_in_id
+            ) linked ON linked.stock_in_id = s.id
+            ORDER BY s.date ASC, s.created_at ASC
+          `,
+          args: []
+        });
+
+        // ยอดขายเก่าที่ไม่ได้ผูกล็อต — เกลี่ยแบบเข้าก่อนออกก่อน (FIFO) ภายใน SKU/สี/ไซส์เดียวกัน
+        // เพื่อให้ผลรวมคงเหลือรายล็อตตรงกับ view=inventory
+        const unlinkedResult = await db.execute({
+          sql: `
+            SELECT sku, color, size, SUM(quantity) AS qty_sold
+            FROM sales_orders
+            WHERE stock_in_id IS NULL OR stock_in_id = ''
+            GROUP BY sku, color, size
+          `,
+          args: []
+        });
+
+        const groupKey = (r) => `${r.sku}|${r.color}|${r.size}`;
+        const pendingSold = new Map(
+          unlinkedResult.rows.map((r) => [groupKey(r), Number(r.qty_sold) || 0])
+        );
+
+        const lots = lotsResult.rows.map((r) => {
+          const quantity = Number(r.quantity) || 0;
+          let qtySold = Math.min(Number(r.linked_sold) || 0, quantity);
+
+          const key = groupKey(r);
+          const pending = pendingSold.get(key) || 0;
+          if (pending > 0) {
+            const take = Math.min(pending, quantity - qtySold);
+            if (take > 0) {
+              qtySold += take;
+              pendingSold.set(key, pending - take);
+            }
+          }
+
+          return {
+            id: r.id,
+            date: r.date,
+            sku: r.sku,
+            product_name: r.product_name,
+            product_category: r.product_category,
+            color: r.color,
+            size: r.size,
+            quantity,
+            cost_price: Number(r.cost_price) || 0,
+            sell_price: Number(r.sell_price) || 0,
+            note: r.note,
+            image_url: r.image_url,
+            recorded_by: r.recorded_by,
+            created_at: r.created_at,
+            qty_sold: qtySold,
+            remaining: quantity - qtySold
+          };
+        });
+
+        return res.status(200).json({ data: lots });
+      }
+
       // available=true — คืนเฉพาะรายการที่ยังมีสต๊อก > 0
       if (available === 'true') {
         const result = await db.execute({

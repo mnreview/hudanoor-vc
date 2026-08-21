@@ -19,6 +19,7 @@ const MENU_OPTIONS = [
   { id: 'sales-entry', label: 'บันทึกยอดขาย' },
   { id: 'order-history', label: 'ประวัติการขาย' },
   { id: 'stock-inventory', label: 'สต๊อกคงเหลือ' },
+  { id: 'stock-value', label: 'สรุปมูลค่าสต๊อก' },
   { id: 'task-reminder', label: 'Task Reminder' },
   { id: 'employees', label: 'จัดการพนักงาน' },
   { id: 'payroll', label: 'จ่ายเงินเดือน (Admin เท่านั้น)' },

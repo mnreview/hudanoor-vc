@@ -16,6 +16,7 @@ import { StockReceiving } from "@/pages/StockReceiving";
 import { SalesEntry } from "@/pages/SalesEntry";
 import OrderHistory from "@/pages/OrderHistory";
 import { StockInventory } from "@/pages/StockInventory";
+import { StockValue } from "@/pages/StockValue";
 import { AddRecordForm } from "@/components/forms/add-record-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useSheetsData } from "@/hooks/use-sheets-data";
@@ -26,6 +27,7 @@ const pathToPage: Record<string, string> = {
   '/sales-entry': 'sales-entry',
   '/order-history': 'order-history',
   '/stock-inventory': 'stock-inventory',
+  '/stock-value': 'stock-value',
   '/task-reminder': 'task-reminder',
   '/employees': 'employees',
   '/payroll': 'payroll',
@@ -100,6 +102,8 @@ export function MainLayout() {
         return <OrderHistory />;
       case 'stock-inventory':
         return <StockInventory />;
+      case 'stock-value':
+        return <StockValue />;
       case 'task-reminder':
         return <TaskReminder />;
       case 'employees':

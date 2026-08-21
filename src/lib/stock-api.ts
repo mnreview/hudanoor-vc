@@ -95,6 +95,21 @@ export interface StockInventoryItem {
   image_url?: string;
 }
 
+// สต๊อกรายล็อตนำเข้า — 1 แถว = 1 รายการที่รับเข้า (stock_in) พร้อมยอดขาย/คงเหลือของล็อตนั้น
+export interface StockLotItem extends StockItem {
+  qty_sold: number;
+  remaining: number;
+}
+
+export async function getStockLots(): Promise<StockLotItem[]> {
+  const res = await fetch(`${API_BASE}/stock?view=lots`, {
+    headers: getAuthHeaders()
+  });
+  if (!res.ok) throw new Error('Failed to fetch stock lots');
+  const data = await res.json();
+  return data.data as StockLotItem[];
+}
+
 export async function getAvailableStock(): Promise<AvailableStockItem[]> {
   const res = await fetch(`${API_BASE}/stock?available=true`, {
     headers: getAuthHeaders()
